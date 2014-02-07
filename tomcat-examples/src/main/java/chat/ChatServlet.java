@@ -27,8 +27,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.catalina.Globals;
 import org.apache.catalina.comet.CometEvent;
+import org.apache.catalina.comet.CometEvent.EventSubType;
 import org.apache.catalina.comet.CometProcessor;
 
 /**
@@ -71,7 +71,7 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 	 */
 	@Override
 	public void event(CometEvent event) throws IOException, ServletException {
-		MyLogger.print("event");
+		MyLogger.print("event", event.getEventType().name());
 		// Note: There should really be two servlets in this example, to avoid
 		// mixing Comet stuff with regular connection processing
 		HttpServletRequest request = event.getHttpServletRequest();
@@ -103,7 +103,6 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 				event.close();
 				return;
 			}
-			setTimeOut(event);
 			begin(event, request, response);
 		} else if (event.getEventType() == CometEvent.EventType.ERROR) {
 			MyLogger.print("error", event.getEventType().name());
@@ -138,20 +137,6 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 						+ " joined the chat.");
 	}
 
-	private void setTimeOut(CometEvent event) {
-		try {
-			// event.getHttpServletRequest().getAttribute(Globals.COMET_TIMEOUT_SUPPORTED_ATTR);
-			MyLogger.print("Setting time-out");
-			event.setTimeout(60 * 60 * 1000);
-		} catch (UnsupportedOperationException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ServletException e) {
-			e.printStackTrace();
-		}
-	}
-
 	protected void end(CometEvent event, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		MyLogger.print("end");
@@ -169,11 +154,15 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 	protected void error(CometEvent event, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		MyLogger.print("error");
-		log("Error for session: " + request.getSession(true).getId());
-		synchronized (connections) {
-			connections.remove(response);
+		MyLogger.print("event sub type: " + event.getEventSubType());
+
+		if (event.getEventSubType() != EventSubType.TIMEOUT) {
+			log("Error for session: " + request.getSession(true).getId());
+			synchronized (connections) {
+				connections.remove(response);
+			}
+			event.close();
 		}
-		event.close();
 	}
 
 	protected void read(CometEvent event, HttpServletRequest request,
