@@ -1,4 +1,4 @@
-package chat;
+package chat.log;
 
 public class MyLogger {
 

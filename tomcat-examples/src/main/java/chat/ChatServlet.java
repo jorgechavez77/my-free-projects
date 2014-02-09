@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -30,6 +31,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.catalina.comet.CometEvent;
 import org.apache.catalina.comet.CometEvent.EventSubType;
 import org.apache.catalina.comet.CometProcessor;
+import org.apache.commons.lang.StringUtils;
+
+import chat.domain.Customer;
+import chat.domain.HelpDesk;
+import chat.log.MyLogger;
+import chat.service.ChatManager;
 
 /**
  * Helper class to implement Comet functionality.
@@ -40,7 +47,12 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 
 	private static final String CHARSET = "UTF-8";
 
-	protected ArrayList<HttpServletResponse> connections = new ArrayList<HttpServletResponse>();
+	// it has to be a spring service (singleton)
+	protected ChatManager chatManager = new ChatManager();
+
+	// protected ArrayList<HttpServletResponse> connections = new
+	// ArrayList<HttpServletResponse>();
+	protected List<ChatRoom> connections = new ArrayList<>();
 	protected transient MessageSender messageSender = null;
 
 	@Override
@@ -56,6 +68,7 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 	@Override
 	public void destroy() {
 		MyLogger.print("destroy");
+		// connections.clear();
 		connections.clear();
 		messageSender.stop();
 		messageSender = null;
@@ -71,7 +84,7 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 	 */
 	@Override
 	public void event(CometEvent event) throws IOException, ServletException {
-		MyLogger.print("event", event.getEventType().name());
+		MyLogger.print("event: ", event.getEventType().name());
 		// Note: There should really be two servlets in this example, to avoid
 		// mixing Comet stuff with regular connection processing
 		HttpServletRequest request = event.getHttpServletRequest();
@@ -128,8 +141,15 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 		writer.println("<div>Welcome to the chat. <a href='chat'>Click here to reload this window</a></div>");
 		writer.flush();
 
+		// synchronized (connections) {
+		// connections.add(response);
+		// }
+
 		synchronized (connections) {
-			connections.add(response);
+			String nickName = (String) request.getSession(true).getAttribute(
+					"nickname");
+			ChatRoom chatRoom = chatManager.registerChatter(nickName, response);
+			connections.add(chatRoom);
 		}
 
 		messageSender.send("Tomcat",
@@ -151,6 +171,14 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 		event.close();
 	}
 
+	/**
+	 * It needs to handle the Event TIMEOUT somehow when the user logs out
+	 * 
+	 * @param event
+	 * @param request
+	 * @param response
+	 * @throws IOException
+	 */
 	protected void error(CometEvent event, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		MyLogger.print("error");
@@ -220,7 +248,7 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 
 		public void send(String user, String message) {
 			synchronized (messages) {
-				MyLogger.print("message:", message);
+				MyLogger.print("Adding message:", message);
 				messages.add("[" + user + "]: " + message);
 				messages.notify();
 			}
@@ -249,15 +277,19 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 					messages.clear();
 				}
 
+				// Here is where the messages are handled
 				synchronized (connections) {
 					for (int i = 0; i < connections.size(); i++) {
 						try {
-							PrintWriter writer = connections.get(i).getWriter();
-							for (int j = 0; j < pendingMessages.length; j++) {
-								writer.println("<div>"
-										+ filter(pendingMessages[j]) + "</div>");
-							}
-							writer.flush();
+							MyLogger.print("sending message to: ", connections
+									.get(i).getCustomer().getId());
+
+							if (connections.get(i).getCustomer() != null)
+								printMessage(connections.get(i).getCustomer()
+										.getResponse(), pendingMessages);
+							if (connections.get(i).getHelpDesk() != null)
+								printMessage(connections.get(i).getHelpDesk()
+										.getResponse(), pendingMessages);
 						} catch (IOException e) {
 							log("IOException sending message", e);
 							e.printStackTrace();
@@ -266,9 +298,37 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 				}
 
 			}
-
 		}
 
+		private void printMessage(HttpServletResponse response,
+				String[] pendingMessages) throws IOException {
+			PrintWriter writer = response.getWriter();
+
+			for (int j = 0; j < pendingMessages.length; j++) {
+				if (getChatRoom(pendingMessages[j]) != null)
+					writer.println("<div>" + filter(pendingMessages[j])
+							+ "</div>");
+			}
+			writer.flush();
+		}
+	}
+
+	private ChatRoom getChatRoom(String pendingMessage) {
+		String user = StringUtils.substringBetween(pendingMessage, "[", "]");
+		synchronized (connections) {
+			for (ChatRoom chatRoom : connections) {
+				Customer customer = chatRoom.getCustomer();
+				if (customer != null && customer.getId().equals(user)) {
+					return chatRoom;
+				}
+
+				HelpDesk helpDesk = chatRoom.getHelpDesk();
+				if (helpDesk != null && helpDesk.getId().equals(user)) {
+					return chatRoom;
+				}
+			}
+			return null;
+		}
 	}
 
 	/**
@@ -307,4 +367,5 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 		}
 		return (result.toString());
 	}
+
 }
