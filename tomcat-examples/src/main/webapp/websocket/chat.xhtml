@@ -48,6 +48,7 @@
         Chat.socket = null;
 
         Chat.connect = (function(host) {
+        	console.log('Chat.connect to '+ host);
             if ('WebSocket' in window) {
                 Chat.socket = new WebSocket(host);
             } else if ('MozWebSocket' in window) {
@@ -58,6 +59,7 @@
             }
 
             Chat.socket.onopen = function () {
+            console.log('Chat.socket.onopen');
                 Console.log('Info: WebSocket connection opened.');
                 document.getElementById('chat').onkeydown = function(event) {
                     if (event.keyCode == 13) {
@@ -67,6 +69,7 @@
             };
 
             Chat.socket.onclose = function () {
+            	Console.log('Chat.socket.onclose');
                 document.getElementById('chat').onkeydown = null;
                 Console.log('Info: WebSocket closed.');
             };
@@ -77,14 +80,16 @@
         });
 
         Chat.initialize = function() {
+        	console.log('Chat.initialize');
             if (window.location.protocol == 'http:') {
-                Chat.connect('ws://' + window.location.host + '/examples/websocket/chat');
+                Chat.connect('ws://' + window.location.host + '/my-examples/websocket/chat');
             } else {
-                Chat.connect('wss://' + window.location.host + '/examples/websocket/chat');
+                Chat.connect('wss://' + window.location.host + '/my-examples/examples/websocket/chat');
             }
         };
 
         Chat.sendMessage = (function() {
+        	console.log('Chat.sendMessage');
             var message = document.getElementById('chat').value;
             if (message != '') {
                 Chat.socket.send(message);
@@ -108,8 +113,8 @@
 
         Chat.initialize();
 
-
         document.addEventListener("DOMContentLoaded", function() {
+        	console.log('document.addEventListener');
             // Remove elements with "noscript" class - <noscript> is not allowed in XHTML
             var noscripts = document.getElementsByClassName("noscript");
             for (var i = 0; i < noscripts.length; i++) {

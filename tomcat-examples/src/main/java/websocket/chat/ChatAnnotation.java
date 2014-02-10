@@ -46,11 +46,13 @@ public class ChatAnnotation {
 	private Session session;
 
 	public ChatAnnotation() {
+		System.out.println("ChatAnnotation constructor");
 		nickname = GUEST_PREFIX + connectionIds.getAndIncrement();
 	}
 
 	@OnOpen
 	public void start(Session session) {
+		System.out.println("ChatAnnotation:start");
 		this.session = session;
 		connections.add(this);
 		String message = String.format("* %s %s", nickname, "has joined.");
@@ -59,6 +61,7 @@ public class ChatAnnotation {
 
 	@OnClose
 	public void end() {
+		System.out.println("ChatAnnotation:end");
 		connections.remove(this);
 		String message = String
 				.format("* %s %s", nickname, "has disconnected.");
@@ -67,6 +70,7 @@ public class ChatAnnotation {
 
 	@OnMessage
 	public void incoming(String message) {
+		System.out.println("ChatAnnotation:incoming");
 		// Never trust the client
 		String filteredMessage = String.format("%s: %s", nickname,
 				HTMLFilter.filter(message.toString()));
@@ -75,10 +79,12 @@ public class ChatAnnotation {
 
 	@OnError
 	public void onError(Throwable t) throws Throwable {
+		System.out.println("ChatAnnotation:onError");
 		log.error("Chat Error: " + t.toString(), t);
 	}
 
 	private static void broadcast(String msg) {
+		System.out.println("ChatAnnotation:broadcast");
 		for (ChatAnnotation client : connections) {
 			try {
 				synchronized (client) {
@@ -98,4 +104,5 @@ public class ChatAnnotation {
 			}
 		}
 	}
+
 }
