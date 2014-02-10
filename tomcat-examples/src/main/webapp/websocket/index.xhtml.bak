@@ -17,16 +17,22 @@
 -->
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>Apache Tomcat WebSocket Examples</title>
+<title>Apache Tomcat WebSocket Examples</title>
 </head>
 <body>
-<h1>Apache Tomcat WebSocket Examples</h1>
-<ul>
-    <li><a href="echo.xhtml">Echo example</a></li>
-    <li><a href="chat.xhtml">Chat example</a></li>
-    <li><a href="snake.xhtml">Multiplayer snake example</a></li>
-    <li><a href="drawboard.xhtml">Multiplayer drawboard example</a></li>
-
-</ul>
+	<h1>Apache Tomcat WebSocket Examples</h1>
+	<ul>
+		<li><a href="echo.xhtml">Echo example</a></li>
+		<li><a href="chat.xhtml">Chat example</a></li>
+		<li><a href="snake.xhtml">Multiplayer snake example</a></li>
+		<li><a href="drawboard.xhtml">Multiplayer drawboard example</a></li>
+	</ul>
+	<FORM action="/websocket/login" method="post">
+		<LABEL>user:</LABEL>
+		<INPUT name="user" type="text" value="aaaa"/>
+		<LABEL>password:</LABEL>
+		<INPUT name="password" type="password" value="123"/>
+		<INPUT type="submit" value="Login"/>
+	</FORM>
 </body>
 </html>
