@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package chat;
+package chat.control;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,10 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.catalina.comet.CometEvent;
 import org.apache.catalina.comet.CometEvent.EventSubType;
 import org.apache.catalina.comet.CometProcessor;
-import org.apache.commons.lang.StringUtils;
 
-import chat.domain.Customer;
-import chat.domain.HelpDesk;
 import chat.log.MyLogger;
 import chat.service.ChatManager;
 
@@ -48,11 +45,11 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 	private static final String CHARSET = "UTF-8";
 
 	// it has to be a spring service (singleton)
-	protected ChatManager chatManager = new ChatManager();
+	protected transient ChatManager chatManager = null;
 
 	// protected ArrayList<HttpServletResponse> connections = new
 	// ArrayList<HttpServletResponse>();
-	protected List<ChatRoom> connections = new ArrayList<>();
+	// protected List<ChatRoom> connections = new ArrayList<>();
 	protected transient MessageSender messageSender = null;
 
 	@Override
@@ -63,13 +60,18 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 				+ getServletContext().getContextPath() + "]");
 		messageSenderThread.setDaemon(true);
 		messageSenderThread.start();
+
+		chatManager = new ChatManager();
+		Thread chatManagerThread = new Thread(chatManager, "chatManager");
+		chatManagerThread.setDaemon(true);
+		chatManagerThread.start();
 	}
 
 	@Override
 	public void destroy() {
 		MyLogger.print("destroy");
 		// connections.clear();
-		connections.clear();
+		chatManager.getChatRooms().clear();
 		messageSender.stop();
 		messageSender = null;
 	}
@@ -141,17 +143,14 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 		writer.println("<div>Welcome to the chat. <a href='chat'>Click here to reload this window</a></div>");
 		writer.flush();
 
-		// synchronized (connections) {
-		// connections.add(response);
-		// }
-
-		synchronized (connections) {
+		synchronized (chatManager.getChatRooms()) {
 			String nickName = (String) request.getSession(true).getAttribute(
 					"nickname");
-			ChatRoom chatRoom = chatManager.registerChatter(nickName, response);
-			connections.add(chatRoom);
+			chatManager.addChatter(nickName, response);
+			// connections.add(chatRoom);
 		}
 
+		// This message is not printed because Tomcat user is not part of a room
 		messageSender.send("Tomcat",
 				request.getSession(true).getAttribute("nickname")
 						+ " joined the chat.");
@@ -161,9 +160,10 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 			HttpServletResponse response) throws IOException {
 		MyLogger.print("end");
 		log("End for session: " + request.getSession(true).getId());
-		synchronized (connections) {
-			connections.remove(response);
-		}
+		// TODO Review this
+		// synchronized (connections) {
+		// connections.remove(response);
+		// }
 
 		PrintWriter writer = response.getWriter();
 		writer.println("</body></html>");
@@ -181,14 +181,15 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 	 */
 	protected void error(CometEvent event, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
-		MyLogger.print("error");
-		MyLogger.print("event sub type: " + event.getEventSubType());
+		// MyLogger.print("error");
+		// MyLogger.print("event sub type: " + event.getEventSubType());
 
 		if (event.getEventSubType() != EventSubType.TIMEOUT) {
 			log("Error for session: " + request.getSession(true).getId());
-			synchronized (connections) {
-				connections.remove(response);
-			}
+			// TODO review this
+			// synchronized (connections) {
+			// connections.remove(response);
+			// }
 			event.close();
 		}
 	}
@@ -233,13 +234,14 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 	public class MessageSender implements Runnable {
 
 		protected boolean running = true;
-		protected ArrayList<String> messages = new ArrayList<String>();
+		protected ArrayList<MessageObject> messages = new ArrayList<>();
 
 		public MessageSender() {
 			// Default contructor
 		}
 
 		public void stop() {
+			MyLogger.print("Thread stopped");
 			running = false;
 			synchronized (messages) {
 				messages.notify();
@@ -249,7 +251,10 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 		public void send(String user, String message) {
 			synchronized (messages) {
 				MyLogger.print("Adding message:", message);
-				messages.add("[" + user + "]: " + message);
+				MessageObject messageObject = new MessageObject(user, "["
+						+ user + "]: " + message);
+				// messages.add("[" + user + "]: " + message);
+				messages.add(messageObject);
 				messages.notify();
 			}
 		}
@@ -263,7 +268,7 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 			MyLogger.print("MessageSender", "run");
 			// Loop until we receive a shutdown command
 			while (running) {
-				String[] pendingMessages;
+				MessageObject[] pendingMessages;
 				synchronized (messages) {
 					try {
 						if (messages.size() == 0) {
@@ -273,61 +278,30 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 						// Ignore
 						e.printStackTrace();
 					}
-					pendingMessages = messages.toArray(new String[0]);
+					pendingMessages = messages.toArray(new MessageObject[0]);
 					messages.clear();
 				}
 
 				// Here is where the messages are handled
-				synchronized (connections) {
-					for (int i = 0; i < connections.size(); i++) {
-						try {
-							MyLogger.print("sending message to: ", connections
-									.get(i).getCustomer().getId());
-
-							if (connections.get(i).getCustomer() != null)
-								printMessage(connections.get(i).getCustomer()
-										.getResponse(), pendingMessages);
-							if (connections.get(i).getHelpDesk() != null)
-								printMessage(connections.get(i).getHelpDesk()
-										.getResponse(), pendingMessages);
-						} catch (IOException e) {
-							log("IOException sending message", e);
-							e.printStackTrace();
+				synchronized (chatManager) {
+					for (MessageObject messageObject : pendingMessages) {
+						List<HttpServletResponse> responses = chatManager
+								.getResponses(messageObject.getId());
+						for (HttpServletResponse response : responses) {
+							PrintWriter writer = null;
+							try {
+								writer = response.getWriter();
+								writer.println("<div>"
+										+ filter(messageObject.getMessage())
+										+ "</div>");
+								writer.flush();
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
 						}
 					}
 				}
-
 			}
-		}
-
-		private void printMessage(HttpServletResponse response,
-				String[] pendingMessages) throws IOException {
-			PrintWriter writer = response.getWriter();
-
-			for (int j = 0; j < pendingMessages.length; j++) {
-				if (getChatRoom(pendingMessages[j]) != null)
-					writer.println("<div>" + filter(pendingMessages[j])
-							+ "</div>");
-			}
-			writer.flush();
-		}
-	}
-
-	private ChatRoom getChatRoom(String pendingMessage) {
-		String user = StringUtils.substringBetween(pendingMessage, "[", "]");
-		synchronized (connections) {
-			for (ChatRoom chatRoom : connections) {
-				Customer customer = chatRoom.getCustomer();
-				if (customer != null && customer.getId().equals(user)) {
-					return chatRoom;
-				}
-
-				HelpDesk helpDesk = chatRoom.getHelpDesk();
-				if (helpDesk != null && helpDesk.getId().equals(user)) {
-					return chatRoom;
-				}
-			}
-			return null;
 		}
 	}
 

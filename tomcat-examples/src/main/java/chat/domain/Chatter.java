@@ -2,15 +2,46 @@ package chat.domain;
 
 import javax.servlet.http.HttpServletResponse;
 
-public interface Chatter {
+import chat.control.ChatRoom;
 
-	String CUSTOMER = "C";
-	String HELP_DESK = "H";
+public abstract class Chatter {
 
-	void setId(String id);
+	public static final String CUSTOMER = "C";
+	public static final String HELP_DESK = "H";
 
-	void setResponse(HttpServletResponse response);
+	private String id;
+	private HttpServletResponse response;
+	private ChatRoom chatRoom;
 
-	String getChatterType();
+	public HttpServletResponse getResponse() {
+		return response;
+	}
+
+	public void setResponse(HttpServletResponse response) {
+		this.response = response;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public void setChatRoom(ChatRoom chatRoom) {
+		this.chatRoom = chatRoom;
+	}
+
+	public ChatRoom getChatRoom() {
+		return this.chatRoom;
+	}
+
+	abstract String getChatterType();
+
+	@Override
+	public String toString() {
+		return "chatter id: " + getId();
+	}
 
 }
