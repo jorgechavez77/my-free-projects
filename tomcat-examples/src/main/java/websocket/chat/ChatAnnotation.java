@@ -21,6 +21,8 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.servlet.http.HttpSession;
+import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -33,7 +35,7 @@ import org.apache.juli.logging.LogFactory;
 
 import util.HTMLFilter;
 
-@ServerEndpoint(value = "/websocket/chat")
+@ServerEndpoint(value = "/websocket/chat", configurator = GetHttpSessionConfigurator.class)
 public class ChatAnnotation {
 
 	private static final Log log = LogFactory.getLog(ChatAnnotation.class);
@@ -44,6 +46,7 @@ public class ChatAnnotation {
 
 	private final String nickname;
 	private Session session;
+	private HttpSession httpSession;
 
 	public ChatAnnotation() {
 		System.out.println("ChatAnnotation constructor");
@@ -51,7 +54,11 @@ public class ChatAnnotation {
 	}
 
 	@OnOpen
-	public void start(Session session) {
+	public void start(Session session, EndpointConfig config) {
+		this.httpSession = (HttpSession) config.getUserProperties().get(
+				HttpSession.class.getName());
+		System.out.println("user: " + httpSession.getAttribute("user"));
+
 		System.out.println("ChatAnnotation:start");
 		this.session = session;
 		connections.add(this);

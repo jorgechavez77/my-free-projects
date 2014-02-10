@@ -23,7 +23,7 @@ public class ChatLogin extends HttpServlet {
 
 		MyLogger.print("user: " + user + ", password: " + password);
 
-		req.setAttribute("user", user);
+		req.getSession().setAttribute("user", user);
 
 		resp.sendRedirect("chat.xhtml");
 	}
