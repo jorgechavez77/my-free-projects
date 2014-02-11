@@ -23,16 +23,22 @@ public class ChatLogin extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+
 		String user = req.getParameter("user");
 		String password = req.getParameter("password");
 
 		MyLogger.print("user: " + user + ", password: " + password);
 
+		req.getSession();
+
 		Chatter chatter = chatService.findUser(user);
 
-		req.getSession().setAttribute("user", chatter);
-
-		resp.sendRedirect("chat.xhtml");
+		if (chatter != null) {
+			req.getSession().setAttribute("user", chatter);
+			resp.sendRedirect("chat.jsp");
+		} else {
+			req.setAttribute("logginMessage", "User or password are incorrect");
+			req.getRequestDispatcher("/index.jsp");
+		}
 	}
-
 }

@@ -7,12 +7,6 @@
 <title>Insert title here</title>
 </head>
 <body>
-	${loginMessage}
-	<br />
-	<FORM action="login" method="post">
-		<LABEL>user:</LABEL> <INPUT name="user" type="text" value="aaaa" /> <LABEL>password:</LABEL>
-		<INPUT name="password" type="password" value="123" /> <INPUT
-			type="submit" value="Login" />
-	</FORM>
+
 </body>
 </html>

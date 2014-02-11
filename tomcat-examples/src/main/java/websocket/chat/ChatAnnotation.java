@@ -55,12 +55,19 @@ public class ChatAnnotation {
 
 	private transient static ChatWorker chatWorker;
 
+	//
 	static {
 		System.out.println("Starting thread");
 		chatWorker = new ChatWorker();
 		Thread thread = new Thread(chatWorker);
 		thread.start();
 	}
+
+	public static void stopThread() {
+		chatWorker.stop();
+	}
+
+	//
 
 	public ChatAnnotation() {
 		System.out.println("ChatAnnotation.new");
@@ -100,8 +107,7 @@ public class ChatAnnotation {
 		String message = String.format("* %s %s", chatter.getId(),
 				"has disconnected.");
 		broadcast(message);
-
-		chatWorker.stop();
+		// chatWorker.stop();
 	}
 
 	@OnMessage

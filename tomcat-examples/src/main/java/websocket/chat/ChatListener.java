@@ -10,6 +10,7 @@ public class ChatListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		System.out.println("ChatListener initialized");
+		// ChatAnnotation.startThread();
 		// Thread thread = new Thread(worker);
 		// thread.start();
 	}
@@ -17,6 +18,7 @@ public class ChatListener implements ServletContextListener {
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
 		System.out.println("ChatListener destroyed");
+		ChatAnnotation.stopThread();
 		// worker.setRunning(false);
 		// worker.notify();
 	}

@@ -1,120 +1,125 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<!DOCTYPE html>
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+	pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Apache Tomcat WebSocket Examples: Chat</title>
-    <style type="text/css">
-        input#chat {
-            width: 410px
-        }
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Apache Tomcat WebSocket Examples: Chat</title>
+<style type="text/css">
+input#chat {
+	width: 410px
+}
 
-        #console-container {
-            width: 400px;
-        }
+#console-container {
+	width: 400px;
+}
 
-        #console {
-            border: 1px solid #CCCCCC;
-            border-right-color: #999999;
-            border-bottom-color: #999999;
-            height: 170px;
-            overflow-y: scroll;
-            padding: 5px;
-            width: 100%;
-        }
+#console {
+	border: 1px solid #CCCCCC;
+	border-right-color: #999999;
+	border-bottom-color: #999999;
+	height: 170px;
+	overflow-y: scroll;
+	padding: 5px;
+	width: 100%;
+}
 
-        #console p {
-            padding: 0;
-            margin: 0;
-        }
-    ></style>
-    <script type="text/javascript">
-    function load() {
-        var Chat = {};
+#console p {
+	padding: 0;
+	margin: 0;
+}
 
-        Chat.socket = null;
+</style>
+<script type="text/javascript">
+	function load() {
+		var Chat = {};
 
-        Chat.connect = (function(host) {
-            if ('WebSocket' in window) {
-                Chat.socket = new WebSocket(host);
-            } else if ('MozWebSocket' in window) {
-                Chat.socket = new MozWebSocket(host);
-            } else {
-                Console.log('Error: WebSocket is not supported by this browser.');
-                return;
-            }
+		Chat.socket = null;
 
-            Chat.socket.onopen = function () {
-                Console.log('Info: WebSocket connection opened.');
-                document.getElementById('chat').onkeydown = function(event) {
-                    if (event.keyCode == 13) {
-                        Chat.sendMessage();
-                    }
-                };
-            };
+		Chat.connect = (function(host) {
+			if ('WebSocket' in window) {
+				Chat.socket = new WebSocket(host);
+			} else if ('MozWebSocket' in window) {
+				Chat.socket = new MozWebSocket(host);
+			} else {
+				Console
+						.log('Error: WebSocket is not supported by this browser.');
+				return;
+			}
 
-            Chat.socket.onclose = function () {
-                document.getElementById('chat').onkeydown = null;
-                Console.log('Info: WebSocket closed.');
-            };
+			Chat.socket.onopen = function() {
+				Console.log('Info: WebSocket connection opened.');
+				document.getElementById('chat').onkeydown = function(event) {
+					if (event.keyCode == 13) {
+						Chat.sendMessage();
+					}
+				};
+			};
 
-            Chat.socket.onmessage = function (message) {
-                Console.log(message.data);
-            };
-        });
+			Chat.socket.onclose = function() {
+				document.getElementById('chat').onkeydown = null;
+				Console.log('Info: WebSocket closed.');
+			};
 
-        Chat.initialize = function() {
-            if (window.location.protocol == 'http:') {
-                Chat.connect('ws://' + window.location.host + '/examples/websocket/chat');
-            } else {
-                Chat.connect('wss://' + window.location.host + '/examples/websocket/chat');
-            }
-        };
+			Chat.socket.onmessage = function(message) {
+				Console.log(message.data);
+			};
+		});
 
-        Chat.sendMessage = (function() {
-            var message = document.getElementById('chat').value;
-            if (message != '') {
-                Chat.socket.send(message);
-                document.getElementById('chat').value = '';
-            }
-        });
+		Chat.initialize = function() {
+			if (window.location.protocol == 'http:') {
+				Chat.connect('ws://' + window.location.host
+						+ '/my-examples/websocket/chat');
+			} else {
+				Chat.connect('wss://' + window.location.host
+						+ '/my-examples/websocket/chat');
+			}
+		};
 
-        var Console = {};
+		Chat.sendMessage = (function() {
+			var message = document.getElementById('chat').value;
+			if (message != '') {
+				Chat.socket.send(message);
+				document.getElementById('chat').value = '';
+			}
+		});
 
-        Console.log = (function(message) {
-            var console = document.getElementById('console');
-            var p = document.createElement('p');
-            p.style.wordWrap = 'break-word';
-            p.innerHTML = message;
-            console.appendChild(p);
-            while (console.childNodes.length > 25) {
-                console.removeChild(console.firstChild);
-            }
-            console.scrollTop = console.scrollHeight;
-        });
+		var Console = {};
 
-        Chat.initialize();
+		Console.log = (function(message) {
+			var console = document.getElementById('console');
+			var p = document.createElement('p');
+			p.style.wordWrap = 'break-word';
+			p.innerHTML = message;
+			console.appendChild(p);
+			while (console.childNodes.length > 25) {
+				console.removeChild(console.firstChild);
+			}
+			console.scrollTop = console.scrollHeight;
+		});
 
+		Chat.initialize();
 
-        document.addEventListener("DOMContentLoaded", function() {
-            // Remove elements with "noscript" class - <noscript> is not allowed in XHTML
-            var noscripts = document.getElementsByClassName("noscript");
-            for (var i = 0; i < noscripts.length; i++) {
-                noscripts[i].parentNode.removeChild(noscripts[i]);
-            }
-        }, false);
+		document.addEventListener("DOMContentLoaded", function() {
+			// Remove elements with "noscript" class - <noscript> is not allowed in XHTML
+			var noscripts = document.getElementsByClassName("noscript");
+			for (var i = 0; i < noscripts.length; i++) {
+				noscripts[i].parentNode.removeChild(noscripts[i]);
+			}
+		}, false);
 	};
-    </script>
+</script>
 </head>
 <body onload="load()">
-<div class="noscript"><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websockets rely on Javascript being enabled. Please enable
-    Javascript and reload this page!</h2></div>
-<div>
-    <p>
-        <input type="text" placeholder="type and press enter to chat" id="chat" />
-    </p>
-    <div id="console-container">
-        <div id="console"/>
-    </div>
-</div>
+	${user}
+	<div>
+		<p>
+			<input type="text" placeholder="type and press enter to chat"
+				id="chat" />
+		</p>
+		<div id="console-container">
+			<div id="console" />
+		</div>
+	</div>
+	<button value="" onclick=""/>
 </body>
 </html>

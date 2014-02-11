@@ -6,6 +6,10 @@ public class ChatServiceImpl implements ChatService {
 
 	@Override
 	public Chatter findUser(String user) {
+		if (!(user.contains("client") || user.contains("helper"))) {
+			return null;
+		}
+
 		Chatter chatter = new Chatter();
 		chatter.setId(user);
 		chatter.setType(getClientType(user));
