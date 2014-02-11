@@ -2,21 +2,29 @@ package chat.domain;
 
 import java.io.Serializable;
 
-import javax.servlet.http.HttpServletResponse;
-
+import websocket.chat.ChatAnnotation;
 import chat.control.ChatRoom;
 
 public class Chatter implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String CUSTOMER = "C";
-	public static final String HELP_DESK = "H";
+	public static final String CLIENT = "C";
+	public static final String HELPER = "H";
 
 	private String id;
-	private HttpServletResponse response;
 	private ChatRoom chatRoom;
 	private String type;
+
+	private ChatAnnotation chatSocket;
+
+	public ChatAnnotation getChatSocket() {
+		return chatSocket;
+	}
+
+	public void setChatSocket(ChatAnnotation chatSocket) {
+		this.chatSocket = chatSocket;
+	}
 
 	public String getType() {
 		return type;
@@ -24,14 +32,6 @@ public class Chatter implements Serializable {
 
 	public void setType(String type) {
 		this.type = type;
-	}
-
-	public HttpServletResponse getResponse() {
-		return response;
-	}
-
-	public void setResponse(HttpServletResponse response) {
-		this.response = response;
 	}
 
 	public String getId() {

@@ -33,6 +33,7 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
 import util.HTMLFilter;
+import chat.control.ChatRoom;
 import chat.domain.Chatter;
 
 @ServerEndpoint(value = "/websocket/chat", configurator = GetHttpSessionConfigurator.class)
@@ -42,12 +43,15 @@ public class ChatAnnotation {
 
 	// private static final String GUEST_PREFIX = "Guest";
 	// private static final AtomicInteger connectionIds = new AtomicInteger(0);
-	private static final Set<ChatAnnotation> connections = new CopyOnWriteArraySet<ChatAnnotation>();
+	private static final Set<ChatAnnotation> clientConnections = new CopyOnWriteArraySet<ChatAnnotation>();
+	private static final Set<ChatAnnotation> helperConnections = new CopyOnWriteArraySet<ChatAnnotation>();
 
 	// private String nickname;
 	private Session session;
 	private HttpSession httpSession;
 	private Chatter chatter;
+
+	private boolean isBusy;
 
 	private transient static ChatWorker chatWorker;
 
@@ -69,10 +73,18 @@ public class ChatAnnotation {
 				HttpSession.class.getName());
 
 		this.chatter = (Chatter) httpSession.getAttribute("user");
+		this.chatter.setChatSocket(this);
 
 		System.out.println("ChatAnnotation.start");
 		this.session = session;
-		connections.add(this);
+
+		// Adding sockets to different lists
+		if (chatter.getType().equals(Chatter.CLIENT)) {
+			clientConnections.add(this);
+		} else {
+			helperConnections.add(this);
+		}
+
 		String message = String.format("* %s %s", chatter.getId(),
 				"has joined.");
 		broadcast(message);
@@ -80,38 +92,49 @@ public class ChatAnnotation {
 
 	@OnClose
 	public void end() {
-		System.out.println("ChatAnnotation:end");
-		connections.remove(this);
+		System.out.println("ChatAnnotation.end");
+		// Removing socket from lists
+		clientConnections.remove(this);
+		helperConnections.remove(this);
+
 		String message = String.format("* %s %s", chatter.getId(),
 				"has disconnected.");
 		broadcast(message);
+
+		chatWorker.stop();
 	}
 
 	@OnMessage
 	public void incoming(String message) {
-		System.out.println("ChatAnnotation:incoming");
+		System.out.println("ChatAnnotation.incoming");
 		// Never trust the client
 		String filteredMessage = String.format("%s: %s", chatter.getId(),
 				HTMLFilter.filter(message.toString()));
-		broadcast(filteredMessage);
+		// broadcast(filteredMessage);
+		if (this.chatter.getChatRoom() != null) {
+			newBroadcast(filteredMessage, this);
+		} else {
+			broadcast(filteredMessage);
+		}
 	}
 
 	@OnError
 	public void onError(Throwable t) throws Throwable {
-		System.out.println("ChatAnnotation:onError");
+		System.out.println("ChatAnnotation.onError");
 		log.error("Chat Error: " + t.toString(), t);
 	}
 
 	private static void broadcast(String msg) {
 		System.out.println("ChatAnnotation.broadcast");
-		for (ChatAnnotation client : connections) {
+		for (ChatAnnotation client : clientConnections) {
+			System.out.println("Sending message to all clients");
 			try {
 				synchronized (client) {
 					client.session.getBasicRemote().sendText(msg);
 				}
 			} catch (IOException e) {
 				log.debug("Chat Error: Failed to send message to client", e);
-				connections.remove(client);
+				clientConnections.remove(client);
 				try {
 					client.session.close();
 				} catch (IOException e1) {
@@ -121,6 +144,114 @@ public class ChatAnnotation {
 						client.chatter.getId(), "has been disconnected.");
 				broadcast(message);
 			}
+		}
+		for (ChatAnnotation client : helperConnections) {
+			System.out.println("Sending message to all helpers");
+			try {
+				synchronized (client) {
+					client.session.getBasicRemote().sendText(msg);
+				}
+			} catch (IOException e) {
+				log.debug("Chat Error: Failed to send message to client", e);
+				helperConnections.remove(client);
+				try {
+					client.session.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				String message = String.format("* %s %s",
+						client.chatter.getId(), "has been disconnected.");
+				broadcast(message);
+			}
+		}
+	}
+
+	private static class ChatWorker implements Runnable {
+
+		boolean running = false;
+
+		public ChatWorker() {
+			running = true;
+		}
+
+		@Override
+		public void run() {
+			System.out.println("Running ChatWorker");
+			while (running) {
+				synchronized (helperConnections) {
+					if (!helperConnections.isEmpty()) {
+						for (ChatAnnotation helper : helperConnections) {
+							// Look for free helpers
+							if (!helper.isBusy) {
+								synchronized (clientConnections) {
+									if (!clientConnections.isEmpty()) {
+										for (ChatAnnotation client : clientConnections) {
+											if (!client.isBusy) {
+												// Meet helper and client
+												System.out
+														.println("Setting chat room");
+												new ChatRoom(client.chatter,
+														helper.chatter);
+												client.isBusy = true;
+												helper.isBusy = true;
+												break;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		public void stop() {
+			System.out.println("Stopping thread");
+			this.running = false;
+		}
+	}
+
+	/**
+	 * 
+	 * @param msg
+	 * @param socketClient
+	 */
+	private static void newBroadcast(String msg, ChatAnnotation socketClient) {
+		System.out.println("ChatAnnotation.broadcast");
+		ChatRoom room = socketClient.chatter.getChatRoom();
+
+		Chatter chatClient = room.getClient();
+		Chatter chatHelper = room.getHelper();
+
+		try {
+			if (chatClient != null && chatHelper != null) {
+				System.out.println("Sending message to room");
+				ChatAnnotation client = chatClient.getChatSocket();
+				synchronized (client) {
+					client.session.getBasicRemote().sendText(msg);
+				}
+				ChatAnnotation helper = chatHelper.getChatSocket();
+				synchronized (helper) {
+					helper.session.getBasicRemote().sendText(msg);
+				}
+			} else {
+				System.out.println("Sending message to one only");
+				synchronized (socketClient) {
+					socketClient.session.getBasicRemote().sendText(msg);
+				}
+			}
+		} catch (IOException e) {
+			log.debug("Chat Error: Failed to send message to client", e);
+			clientConnections.remove(socketClient);
+			try {
+				socketClient.session.close();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			String message = String.format("* %s %s",
+					socketClient.chatter.getId(), "has been disconnected.");
+			broadcast(message);
 		}
 	}
 

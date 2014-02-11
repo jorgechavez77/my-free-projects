@@ -285,20 +285,20 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 				// Here is where the messages are handled
 				synchronized (chatManager) {
 					for (MessageObject messageObject : pendingMessages) {
-						List<HttpServletResponse> responses = chatManager
-								.getResponses(messageObject.getId());
-						for (HttpServletResponse response : responses) {
-							PrintWriter writer = null;
-							try {
-								writer = response.getWriter();
-								writer.println("<div>"
-										+ filter(messageObject.getMessage())
-										+ "</div>");
-								writer.flush();
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
+//						List<HttpServletResponse> responses = chatManager
+//								.getResponses(messageObject.getId());
+//						for (HttpServletResponse response : responses) {
+//							PrintWriter writer = null;
+//							try {
+//								writer = response.getWriter();
+//								writer.println("<div>"
+//										+ filter(messageObject.getMessage())
+//										+ "</div>");
+//								writer.flush();
+//							} catch (IOException e) {
+//								e.printStackTrace();
+//							}
+//						}
 					}
 				}
 			}

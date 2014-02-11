@@ -64,69 +64,69 @@ public class ChatManager implements Runnable {
 
 	@Override
 	public void run() {
-		MyLogger.print("Assigning Chatters");
-		while (running) {
-			Chatter customer = null;
-			Chatter helpDesk = null;
-			synchronized (freeHelpDesks) {
-				if (!freeHelpDesks.isEmpty()) {
-					helpDesk = freeHelpDesks.get(0);
-					synchronized (awaitingCustomers) {
-						if (!awaitingCustomers.isEmpty()) {
-							customer = awaitingCustomers.get(0);
-							synchronized (chatRooms) {
-								ChatRoom room = new ChatRoom();
-								room.addChatter(helpDesk);
-								room.addChatter(customer);
-								chatRooms.add(room);
-								freeHelpDesks.remove(helpDesk);
-								awaitingCustomers.remove(customer);
-							}
-						}
-					}
-				}
-			}
-		}
+//		MyLogger.print("Assigning Chatters");
+//		while (running) {
+//			Chatter customer = null;
+//			Chatter helpDesk = null;
+//			synchronized (freeHelpDesks) {
+//				if (!freeHelpDesks.isEmpty()) {
+//					helpDesk = freeHelpDesks.get(0);
+//					synchronized (awaitingCustomers) {
+//						if (!awaitingCustomers.isEmpty()) {
+//							customer = awaitingCustomers.get(0);
+//							synchronized (chatRooms) {
+//								ChatRoom room = new ChatRoom();
+//								room.addChatter(helpDesk);
+//								room.addChatter(customer);
+//								chatRooms.add(room);
+//								freeHelpDesks.remove(helpDesk);
+//								awaitingCustomers.remove(customer);
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
 	}
 
-	public List<HttpServletResponse> getResponses(String id) {
-		List<HttpServletResponse> responses = new ArrayList<>();
-		synchronized (chatRooms) {
-			for (ChatRoom chatRoom : chatRooms) {
-				boolean found = false;
-				for (Chatter chatter : chatRoom.getChatters()) {
-					if (chatter.getId().equals(id)) {
-						found = true;
-					}
-				}
-				if (found) {
-					for (Chatter chatter : chatRoom.getChatters()) {
-						MyLogger.print("response from id: " + chatter.getId()
-								+ " from room" + chatRoom);
-						responses.add(chatter.getResponse());
-					}
-				}
-			}
-		}
-		synchronized (awaitingCustomers) {
-			for (Chatter chatter : awaitingCustomers) {
-				if (chatter.getId().equals(id)) {
-					MyLogger.print("response from chatter id: "
-							+ chatter.getId() + " from awaiting cust");
-					responses.add(chatter.getResponse());
-				}
-			}
-		}
-		synchronized (freeHelpDesks) {
-			for (Chatter chatter : freeHelpDesks) {
-				if (chatter.getId().equals(id)) {
-					MyLogger.print("response from chatter id: "
-							+ chatter.getId() + " from free help desk");
-					responses.add(chatter.getResponse());
-				}
-			}
-		}
-		return responses;
-	}
+//	public List<HttpServletResponse> getResponses(String id) {
+//		List<HttpServletResponse> responses = new ArrayList<>();
+//		synchronized (chatRooms) {
+//			for (ChatRoom chatRoom : chatRooms) {
+//				boolean found = false;
+//				for (Chatter chatter : chatRoom.getChatters()) {
+//					if (chatter.getId().equals(id)) {
+//						found = true;
+//					}
+//				}
+//				if (found) {
+//					for (Chatter chatter : chatRoom.getChatters()) {
+//						MyLogger.print("response from id: " + chatter.getId()
+//								+ " from room" + chatRoom);
+//						responses.add(chatter.getResponse());
+//					}
+//				}
+//			}
+//		}
+//		synchronized (awaitingCustomers) {
+//			for (Chatter chatter : awaitingCustomers) {
+//				if (chatter.getId().equals(id)) {
+//					MyLogger.print("response from chatter id: "
+//							+ chatter.getId() + " from awaiting cust");
+//					responses.add(chatter.getResponse());
+//				}
+//			}
+//		}
+//		synchronized (freeHelpDesks) {
+//			for (Chatter chatter : freeHelpDesks) {
+//				if (chatter.getId().equals(id)) {
+//					MyLogger.print("response from chatter id: "
+//							+ chatter.getId() + " from free help desk");
+//					responses.add(chatter.getResponse());
+//				}
+//			}
+//		}
+//		return responses;
+//	}
 
 }

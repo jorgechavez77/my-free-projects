@@ -1,26 +1,37 @@
 package chat.control;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
 
 import chat.domain.Chatter;
-import chat.log.MyLogger;
 
-public class ChatRoom {
+public class ChatRoom implements Serializable {
 
-	private List<Chatter> chatters = new ArrayList<>();
+	private static final long serialVersionUID = 1L;
 
-	public boolean addChatter(Chatter chatter) {
-		MyLogger.print("Adding chatter: " + chatter + " to room: " + toString());
-		return this.chatters.add(chatter);
+	public ChatRoom(Chatter client, Chatter helper) {
+		this.client = client;
+		this.helper = helper;
+		this.client.setChatRoom(this);
+		this.helper.setChatRoom(this);
 	}
 
-	public boolean removeChatter(Chatter chatter) {
-		return this.chatters.remove(chatter);
+	private Chatter client;
+	private Chatter helper;
+
+	public Chatter getClient() {
+		return client;
 	}
 
-	public List<Chatter> getChatters() {
-		return this.chatters;
+	public void setClient(Chatter client) {
+		this.client = client;
+	}
+
+	public Chatter getHelper() {
+		return helper;
+	}
+
+	public void setHelper(Chatter helper) {
+		this.helper = helper;
 	}
 
 }
