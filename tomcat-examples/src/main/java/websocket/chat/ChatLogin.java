@@ -8,12 +8,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import chat.domain.Chatter;
 import chat.log.MyLogger;
+import chat.service.ChatService;
+import chat.service.ChatServiceImpl;
 
 @WebServlet(name = "chatLogin", urlPatterns = "/websocket/login")
 public class ChatLogin extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
+
+	private ChatService chatService = new ChatServiceImpl();
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -23,7 +28,9 @@ public class ChatLogin extends HttpServlet {
 
 		MyLogger.print("user: " + user + ", password: " + password);
 
-		req.getSession().setAttribute("user", user);
+		Chatter chatter = chatService.findUser(user);
+
+		req.getSession().setAttribute("user", chatter);
 
 		resp.sendRedirect("chat.xhtml");
 	}

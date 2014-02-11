@@ -1,7 +1,11 @@
 package chat.service;
 
+import chat.domain.Chatter;
+
 public interface ChatService {
-	
-	boolean isHelpDesk(String id);
+
+	Chatter findUser(String user);
+
+	String getClientType(String id);
 
 }

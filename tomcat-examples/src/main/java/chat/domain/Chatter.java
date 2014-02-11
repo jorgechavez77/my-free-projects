@@ -1,10 +1,14 @@
 package chat.domain;
 
+import java.io.Serializable;
+
 import javax.servlet.http.HttpServletResponse;
 
 import chat.control.ChatRoom;
 
-public abstract class Chatter {
+public class Chatter implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public static final String CUSTOMER = "C";
 	public static final String HELP_DESK = "H";
@@ -12,6 +16,15 @@ public abstract class Chatter {
 	private String id;
 	private HttpServletResponse response;
 	private ChatRoom chatRoom;
+	private String type;
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
 
 	public HttpServletResponse getResponse() {
 		return response;
@@ -36,8 +49,6 @@ public abstract class Chatter {
 	public ChatRoom getChatRoom() {
 		return this.chatRoom;
 	}
-
-	abstract String getChatterType();
 
 	@Override
 	public String toString() {

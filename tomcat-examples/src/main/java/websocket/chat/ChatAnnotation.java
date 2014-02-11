@@ -19,7 +19,6 @@ package websocket.chat;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpSession;
 import javax.websocket.EndpointConfig;
@@ -34,35 +33,39 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
 import util.HTMLFilter;
+import chat.domain.Chatter;
 
 @ServerEndpoint(value = "/websocket/chat", configurator = GetHttpSessionConfigurator.class)
 public class ChatAnnotation {
 
 	private static final Log log = LogFactory.getLog(ChatAnnotation.class);
 
-	private static final String GUEST_PREFIX = "Guest";
-	private static final AtomicInteger connectionIds = new AtomicInteger(0);
+	// private static final String GUEST_PREFIX = "Guest";
+	// private static final AtomicInteger connectionIds = new AtomicInteger(0);
 	private static final Set<ChatAnnotation> connections = new CopyOnWriteArraySet<ChatAnnotation>();
 
-	private final String nickname;
+	// private String nickname;
 	private Session session;
 	private HttpSession httpSession;
+	private Chatter chatter;
 
 	public ChatAnnotation() {
 		System.out.println("ChatAnnotation constructor");
-		nickname = GUEST_PREFIX + connectionIds.getAndIncrement();
+		// nickname = GUEST_PREFIX + connectionIds.getAndIncrement();
 	}
 
 	@OnOpen
 	public void start(Session session, EndpointConfig config) {
 		this.httpSession = (HttpSession) config.getUserProperties().get(
 				HttpSession.class.getName());
-		System.out.println("user: " + httpSession.getAttribute("user"));
+
+		this.chatter = (Chatter) httpSession.getAttribute("user");
 
 		System.out.println("ChatAnnotation:start");
 		this.session = session;
 		connections.add(this);
-		String message = String.format("* %s %s", nickname, "has joined.");
+		String message = String.format("* %s %s", chatter.getId(),
+				"has joined.");
 		broadcast(message);
 	}
 
@@ -70,8 +73,8 @@ public class ChatAnnotation {
 	public void end() {
 		System.out.println("ChatAnnotation:end");
 		connections.remove(this);
-		String message = String
-				.format("* %s %s", nickname, "has disconnected.");
+		String message = String.format("* %s %s", chatter.getId(),
+				"has disconnected.");
 		broadcast(message);
 	}
 
@@ -79,7 +82,7 @@ public class ChatAnnotation {
 	public void incoming(String message) {
 		System.out.println("ChatAnnotation:incoming");
 		// Never trust the client
-		String filteredMessage = String.format("%s: %s", nickname,
+		String filteredMessage = String.format("%s: %s", chatter.getId(),
 				HTMLFilter.filter(message.toString()));
 		broadcast(filteredMessage);
 	}
@@ -91,7 +94,7 @@ public class ChatAnnotation {
 	}
 
 	private static void broadcast(String msg) {
-		System.out.println("ChatAnnotation:broadcast");
+		System.out.println("ChatAnnotation.broadcast");
 		for (ChatAnnotation client : connections) {
 			try {
 				synchronized (client) {
@@ -103,10 +106,10 @@ public class ChatAnnotation {
 				try {
 					client.session.close();
 				} catch (IOException e1) {
-					// Ignore
+					e1.printStackTrace();
 				}
-				String message = String.format("* %s %s", client.nickname,
-						"has been disconnected.");
+				String message = String.format("* %s %s",
+						client.chatter.getId(), "has been disconnected.");
 				broadcast(message);
 			}
 		}

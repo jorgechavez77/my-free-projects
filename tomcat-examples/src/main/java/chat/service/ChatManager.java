@@ -30,23 +30,23 @@ public class ChatManager implements Runnable {
 
 	public void addChatter(String id, HttpServletResponse response) {
 		MyLogger.print("register Chatter");
-		if (chatService.isHelpDesk(id)) {
-			MyLogger.print("id: " + id + " is help desk");
-			HelpDesk helpDesk = new HelpDesk();
-			helpDesk.setId(id);
-			helpDesk.setResponse(response);
-			synchronized (freeHelpDesks) {
-				freeHelpDesks.add(helpDesk);
-			}
-		} else {
-			MyLogger.print("id: " + id + " is customer");
-			Customer customer = new Customer();
-			customer.setId(id);
-			customer.setResponse(response);
-			synchronized (awaitingCustomers) {
-				awaitingCustomers.add(customer);
-			}
-		}
+//		if (chatService.isHelpDesk(id)) {
+//			MyLogger.print("id: " + id + " is help desk");
+//			HelpDesk helpDesk = new HelpDesk();
+//			helpDesk.setId(id);
+//			helpDesk.setResponse(response);
+//			synchronized (freeHelpDesks) {
+//				freeHelpDesks.add(helpDesk);
+//			}
+//		} else {
+//			MyLogger.print("id: " + id + " is customer");
+//			Customer customer = new Customer();
+//			customer.setId(id);
+//			customer.setResponse(response);
+//			synchronized (awaitingCustomers) {
+//				awaitingCustomers.add(customer);
+//			}
+//		}
 	}
 
 	public void endCustomerHelpDeskThread(Customer customer, HelpDesk helpDesk) {

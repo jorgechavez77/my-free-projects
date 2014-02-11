@@ -23,7 +23,7 @@
 		<servlet-name>chatLogin</servlet-name>
 		<servlet-class>websocket.chat.ChatLogin</servlet-class>
 	</servlet>
-	
+
 	<servlet-mapping>
 		<servlet-name>chatLogin</servlet-name>
 		<url-pattern>/websocket/login</url-pattern>
