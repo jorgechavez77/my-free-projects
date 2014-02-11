@@ -49,8 +49,17 @@ public class ChatAnnotation {
 	private HttpSession httpSession;
 	private Chatter chatter;
 
+	private transient static ChatWorker chatWorker;
+
+	static {
+		System.out.println("Starting thread");
+		chatWorker = new ChatWorker();
+		Thread thread = new Thread(chatWorker);
+		thread.start();
+	}
+
 	public ChatAnnotation() {
-		System.out.println("ChatAnnotation constructor");
+		System.out.println("ChatAnnotation.new");
 		// nickname = GUEST_PREFIX + connectionIds.getAndIncrement();
 	}
 
@@ -61,7 +70,7 @@ public class ChatAnnotation {
 
 		this.chatter = (Chatter) httpSession.getAttribute("user");
 
-		System.out.println("ChatAnnotation:start");
+		System.out.println("ChatAnnotation.start");
 		this.session = session;
 		connections.add(this);
 		String message = String.format("* %s %s", chatter.getId(),
