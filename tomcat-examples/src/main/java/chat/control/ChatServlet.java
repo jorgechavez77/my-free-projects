@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -268,7 +267,7 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 			MyLogger.print("MessageSender", "run");
 			// Loop until we receive a shutdown command
 			while (running) {
-				MessageObject[] pendingMessages;
+				// MessageObject[] pendingMessages;
 				synchronized (messages) {
 					try {
 						if (messages.size() == 0) {
@@ -278,28 +277,28 @@ public class ChatServlet extends HttpServlet implements CometProcessor {
 						// Ignore
 						e.printStackTrace();
 					}
-					pendingMessages = messages.toArray(new MessageObject[0]);
+					// pendingMessages = messages.toArray(new MessageObject[0]);
 					messages.clear();
 				}
 
 				// Here is where the messages are handled
 				synchronized (chatManager) {
-					for (MessageObject messageObject : pendingMessages) {
-//						List<HttpServletResponse> responses = chatManager
-//								.getResponses(messageObject.getId());
-//						for (HttpServletResponse response : responses) {
-//							PrintWriter writer = null;
-//							try {
-//								writer = response.getWriter();
-//								writer.println("<div>"
-//										+ filter(messageObject.getMessage())
-//										+ "</div>");
-//								writer.flush();
-//							} catch (IOException e) {
-//								e.printStackTrace();
-//							}
-//						}
-					}
+					// for (MessageObject messageObject : pendingMessages) {
+					// List<HttpServletResponse> responses = chatManager
+					// .getResponses(messageObject.getId());
+					// for (HttpServletResponse response : responses) {
+					// PrintWriter writer = null;
+					// try {
+					// writer = response.getWriter();
+					// writer.println("<div>"
+					// + filter(messageObject.getMessage())
+					// + "</div>");
+					// writer.flush();
+					// } catch (IOException e) {
+					// e.printStackTrace();
+					// }
+					// }
+					// }
 				}
 			}
 		}
