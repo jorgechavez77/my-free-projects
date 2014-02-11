@@ -31,6 +31,8 @@ import javax.websocket.server.ServerEndpoint;
 
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import util.HTMLFilter;
 import chat.control.ChatRoom;
@@ -38,6 +40,8 @@ import chat.domain.Chatter;
 
 @ServerEndpoint(value = "/websocket/chat", configurator = GetHttpSessionConfigurator.class)
 public class ChatAnnotation {
+
+	private final static Logger LOG = LoggerFactory.getLogger(ChatAnnotation.class);
 
 	private static final Log log = LogFactory.getLog(ChatAnnotation.class);
 
@@ -57,7 +61,7 @@ public class ChatAnnotation {
 
 	//
 	static {
-		System.out.println("Starting thread");
+		LOG.info("Starting thread");
 		chatWorker = new ChatWorker();
 		Thread thread = new Thread(chatWorker);
 		thread.start();
@@ -70,7 +74,7 @@ public class ChatAnnotation {
 	//
 
 	public ChatAnnotation() {
-		System.out.println("ChatAnnotation.new");
+		LOG.info("ChatAnnotation.new");
 		// nickname = GUEST_PREFIX + connectionIds.getAndIncrement();
 	}
 
@@ -82,7 +86,7 @@ public class ChatAnnotation {
 		this.chatter = (Chatter) httpSession.getAttribute("user");
 		this.chatter.setChatSocket(this);
 
-		System.out.println("ChatAnnotation.start");
+		LOG.info("ChatAnnotation.start");
 		this.session = session;
 
 		// Adding sockets to different lists
@@ -99,7 +103,7 @@ public class ChatAnnotation {
 
 	@OnClose
 	public void end() {
-		System.out.println("ChatAnnotation.end");
+		LOG.info("ChatAnnotation.end");
 		// Removing socket from lists
 		clientConnections.remove(this);
 		helperConnections.remove(this);
@@ -112,7 +116,7 @@ public class ChatAnnotation {
 
 	@OnMessage
 	public void incoming(String message) {
-		System.out.println("ChatAnnotation.incoming");
+		LOG.info("ChatAnnotation.incoming");
 		// Never trust the client
 		String filteredMessage = String.format("%s: %s", chatter.getId(),
 				HTMLFilter.filter(message.toString()));
@@ -126,14 +130,14 @@ public class ChatAnnotation {
 
 	@OnError
 	public void onError(Throwable t) throws Throwable {
-		System.out.println("ChatAnnotation.onError");
+		LOG.info("ChatAnnotation.onError");
 		log.error("Chat Error: " + t.toString(), t);
 	}
 
 	private static void broadcast(String msg) {
-		System.out.println("ChatAnnotation.broadcast");
+		LOG.info("ChatAnnotation.broadcast");
 		for (ChatAnnotation client : clientConnections) {
-			System.out.println("Sending message to all clients");
+			LOG.info("Sending message to all clients");
 			try {
 				synchronized (client) {
 					client.session.getBasicRemote().sendText(msg);
@@ -152,7 +156,7 @@ public class ChatAnnotation {
 			}
 		}
 		for (ChatAnnotation client : helperConnections) {
-			System.out.println("Sending message to all helpers");
+			LOG.info("Sending message to all helpers");
 			try {
 				synchronized (client) {
 					client.session.getBasicRemote().sendText(msg);
@@ -182,7 +186,7 @@ public class ChatAnnotation {
 
 		@Override
 		public void run() {
-			System.out.println("Running ChatWorker");
+			LOG.info("Running ChatWorker");
 			while (running) {
 				synchronized (helperConnections) {
 					if (!helperConnections.isEmpty()) {
@@ -213,7 +217,7 @@ public class ChatAnnotation {
 		}
 
 		public void stop() {
-			System.out.println("Stopping thread");
+			LOG.info("Stopping thread");
 			this.running = false;
 		}
 	}
@@ -224,7 +228,7 @@ public class ChatAnnotation {
 	 * @param socketClient
 	 */
 	private static void newBroadcast(String msg, ChatAnnotation socketClient) {
-		System.out.println("ChatAnnotation.broadcast");
+		LOG.info("ChatAnnotation.broadcast");
 		ChatRoom room = socketClient.chatter.getChatRoom();
 
 		Chatter chatClient = room.getClient();
@@ -232,7 +236,7 @@ public class ChatAnnotation {
 
 		try {
 			if (chatClient != null && chatHelper != null) {
-				System.out.println("Sending message to room");
+				LOG.info("Sending message to room");
 				ChatAnnotation client = chatClient.getChatSocket();
 				synchronized (client) {
 					client.session.getBasicRemote().sendText(msg);
@@ -242,7 +246,7 @@ public class ChatAnnotation {
 					helper.session.getBasicRemote().sendText(msg);
 				}
 			} else {
-				System.out.println("Sending message to one only");
+				LOG.info("Sending message to one only");
 				synchronized (socketClient) {
 					socketClient.session.getBasicRemote().sendText(msg);
 				}

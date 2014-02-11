@@ -24,6 +24,16 @@ public class ChatLogin extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
+		String action = req.getParameter("action");
+		if (action.equals("login")) {
+			login(req, resp);
+		} else {
+			logout(req, resp);
+		}
+	}
+
+	private void login(HttpServletRequest req, HttpServletResponse resp)
+			throws IOException, ServletException {
 		String user = req.getParameter("user");
 		String password = req.getParameter("password");
 
@@ -37,8 +47,15 @@ public class ChatLogin extends HttpServlet {
 			req.getSession().setAttribute("user", chatter);
 			resp.sendRedirect("chat.jsp");
 		} else {
-			req.setAttribute("logginMessage", "User or password are incorrect");
-			req.getRequestDispatcher("/index.jsp");
+			req.setAttribute("loginMessage", "User or password are incorrect");
+			req.getRequestDispatcher("index.jsp").forward(req, resp);
 		}
 	}
+
+	private void logout(HttpServletRequest req, HttpServletResponse resp)
+			throws IOException, ServletException {
+		req.removeAttribute("user");
+		resp.sendRedirect("index.jsp");
+	}
+
 }

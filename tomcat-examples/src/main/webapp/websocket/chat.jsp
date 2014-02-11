@@ -27,7 +27,6 @@ input#chat {
 	padding: 0;
 	margin: 0;
 }
-
 </style>
 <script type="text/javascript">
 	function load() {
@@ -120,6 +119,9 @@ input#chat {
 			<div id="console" />
 		</div>
 	</div>
-	<button value="" onclick=""/>
+	<form action="login" method="post">
+		<input type="hidden" name="action" value="logout">
+		<input value="Logout" type="submit" />
+	</form>
 </body>
 </html>

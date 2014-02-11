@@ -9,10 +9,21 @@
 <body>
 	${loginMessage}
 	<br />
-	<FORM action="login" method="post">
-		<LABEL>user:</LABEL> <INPUT name="user" type="text" value="aaaa" /> <LABEL>password:</LABEL>
-		<INPUT name="password" type="password" value="123" /> <INPUT
-			type="submit" value="Login" />
-	</FORM>
+	<form action="login" method="post">
+		<input type="hidden" name="action" value="login">
+		<table>
+			<tbody>
+				<tr>
+					<td><label>user:</label></td>
+					<td><input name="user" type="text" /></td>
+				</tr>
+				<tr>
+					<td><label>password:</label></td>
+					<td><input name="password" type="password" /></td>
+					<td><input type="submit" value="Login" /></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
 </body>
 </html>

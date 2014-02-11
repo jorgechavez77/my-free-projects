@@ -9,15 +9,15 @@
     </description>
 	<display-name>Servlet and JSP Examples</display-name>
 
-	<servlet>
-		<servlet-name>ChatServlet</servlet-name>
-		<servlet-class>chat.control.ChatServlet</servlet-class>
-	</servlet>
+<!-- 	<servlet> -->
+<!-- 		<servlet-name>ChatServlet</servlet-name> -->
+<!-- 		<servlet-class>chat.control.ChatServlet</servlet-class> -->
+<!-- 	</servlet> -->
 
-	<servlet-mapping>
-		<servlet-name>ChatServlet</servlet-name>
-		<url-pattern>/jsp/chat/chat</url-pattern>
-	</servlet-mapping>
+<!-- 	<servlet-mapping> -->
+<!-- 		<servlet-name>ChatServlet</servlet-name> -->
+<!-- 		<url-pattern>/jsp/chat/chat</url-pattern> -->
+<!-- 	</servlet-mapping> -->
 
 	<servlet>
 		<servlet-name>chatLogin</servlet-name>
