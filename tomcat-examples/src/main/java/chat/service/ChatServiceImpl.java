@@ -18,8 +18,7 @@ public class ChatServiceImpl implements ChatService {
 
 	@Override
 	public String getClientType(String id) {
-		return id.equalsIgnoreCase("helpDesk") ? Chatter.HELPER
-				: Chatter.CLIENT;
+		return id.contains("helper") ? Chatter.HELPER : Chatter.CLIENT;
 	}
 
 }

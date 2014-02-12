@@ -17,6 +17,8 @@
 package websocket.chat;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -41,7 +43,8 @@ import chat.domain.Chatter;
 @ServerEndpoint(value = "/websocket/chat", configurator = GetHttpSessionConfigurator.class)
 public class ChatAnnotation {
 
-	private final static Logger LOG = LoggerFactory.getLogger(ChatAnnotation.class);
+	private final static Logger LOG = LoggerFactory
+			.getLogger(ChatAnnotation.class);
 
 	private static final Log log = LogFactory.getLog(ChatAnnotation.class);
 
@@ -98,6 +101,7 @@ public class ChatAnnotation {
 
 		String message = String.format("* %s %s", chatter.getId(),
 				"has joined.");
+		message = formatMessage(message);
 		broadcast(message);
 	}
 
@@ -105,6 +109,25 @@ public class ChatAnnotation {
 	public void end() {
 		LOG.info("ChatAnnotation.end");
 		// Removing socket from lists
+
+		// Removing chat room
+		ChatRoom room = this.chatter.getChatRoom();
+		if (room != null) {
+			Chatter client = room.getClient();
+			Chatter helper = room.getHelper();
+			LOG.info("Chatter {} leaves the room", client);
+			LOG.info("Chatter {} leaves the room", client);
+			client.setChatRoom(null);
+			helper.setChatRoom(null);
+			client.getChatSocket().isBusy = false;
+			client.getChatSocket().isBusy = false;
+
+			room.setClient(null);
+			room.setHelper(null);
+			room = null;
+		}
+		//
+
 		clientConnections.remove(this);
 		helperConnections.remove(this);
 
@@ -121,11 +144,23 @@ public class ChatAnnotation {
 		String filteredMessage = String.format("%s: %s", chatter.getId(),
 				HTMLFilter.filter(message.toString()));
 		// broadcast(filteredMessage);
+		filteredMessage = formatMessage(filteredMessage);
 		if (this.chatter.getChatRoom() != null) {
 			newBroadcast(filteredMessage, this);
 		} else {
 			broadcast(filteredMessage);
 		}
+	}
+
+	private String formatMessage(String filteredMessage) {
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+		StringBuilder sb = new StringBuilder();
+		sb.append("(");
+		sb.append(sdf.format(new Date()));
+		sb.append(")");
+		sb.append(" ");
+		sb.append(filteredMessage);
+		return sb.toString();
 	}
 
 	@OnError
@@ -198,8 +233,10 @@ public class ChatAnnotation {
 										for (ChatAnnotation client : clientConnections) {
 											if (!client.isBusy) {
 												// Meet helper and client
-												System.out
-														.println("Setting chat room");
+												LOG.info(
+														"Setting chat room for: {}, {}",
+														helper.chatter,
+														client.chatter);
 												new ChatRoom(client.chatter,
 														helper.chatter);
 												client.isBusy = true;
