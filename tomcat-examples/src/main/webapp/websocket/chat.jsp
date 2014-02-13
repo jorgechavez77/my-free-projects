@@ -1,7 +1,10 @@
+
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%
 	System.out.println("Validating user");
 	if (request.getSession().getAttribute("user") == null) {
-		request.getRequestDispatcher("index.jsp").forward(request, response);
+		request.getRequestDispatcher("index.jsp").forward(request,
+				response);
 	}
 %>
 
@@ -116,19 +119,54 @@ input#chat {
 </script>
 </head>
 <body onload="load()">
-	${user}
-	<div>
-		<p>
-			<input type="text" placeholder="type and press enter to chat"
-				id="chat" />
-		</p>
-		<div id="console-container">
-			<div id="console" />
-		</div>
-	</div>
-	<form action="login" method="post">
-		<input type="hidden" name="action" value="logout"> <input
-			value="Logout" type="submit" />
-	</form>
+
+	<table>
+		<tr>
+			<td>${user}
+				<div>
+					<p>
+						<input type="text" placeholder="type and press enter to chat"
+							id="chat" />
+					</p>
+					<div id="console-container">
+						<div id="console" />
+					</div>
+				</div>
+				<form action="login" method="post">
+					<input type="hidden" name="action" value="logout"> <input
+						value="Logout" type="submit" />
+				</form>
+			</td>
+			<td><c:if test="${user.type eq 'H'}">
+					<table>
+						<tr>
+							<td>
+								<button>Presentacion</button>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<button>Dispositivo</button>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<button>Registro Disp.</button>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<button>Reg. Problema</button>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<button>Ayuda</button>
+							</td>
+						</tr>
+					</table>
+				</c:if></td>
+		</tr>
+	</table>
 </body>
 </html>

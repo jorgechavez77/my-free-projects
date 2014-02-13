@@ -54,7 +54,7 @@ public class ChatLogin extends HttpServlet {
 
 	private void logout(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException, ServletException {
-		req.removeAttribute("user");
+		req.getSession().removeAttribute("user");
 		resp.sendRedirect("index.jsp");
 	}
 
