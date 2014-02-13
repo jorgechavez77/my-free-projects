@@ -1,6 +1,6 @@
 package chat.domain;
 
-import websocket.chat.ChatAnnotation;
+import websocket.chat.ChatWebSocket;
 import chat.control.ChatRoom;
 
 public class Chatter {
@@ -12,13 +12,13 @@ public class Chatter {
 	private ChatRoom chatRoom;
 	private String type;
 
-	private ChatAnnotation chatSocket;
+	private ChatWebSocket chatSocket;
 
-	public ChatAnnotation getChatSocket() {
+	public ChatWebSocket getChatSocket() {
 		return chatSocket;
 	}
 
-	public void setChatSocket(ChatAnnotation chatSocket) {
+	public void setChatSocket(ChatWebSocket chatSocket) {
 		this.chatSocket = chatSocket;
 	}
 

@@ -41,17 +41,17 @@ import chat.control.ChatRoom;
 import chat.domain.Chatter;
 
 @ServerEndpoint(value = "/websocket/chat", configurator = GetHttpSessionConfigurator.class)
-public class ChatAnnotation {
+public class ChatWebSocket {
 
 	private final static Logger LOG = LoggerFactory
-			.getLogger(ChatAnnotation.class);
+			.getLogger(ChatWebSocket.class);
 
-	private static final Log log = LogFactory.getLog(ChatAnnotation.class);
+	private static final Log log = LogFactory.getLog(ChatWebSocket.class);
 
 	// private static final String GUEST_PREFIX = "Guest";
 	// private static final AtomicInteger connectionIds = new AtomicInteger(0);
-	private static final Set<ChatAnnotation> clientConnections = new CopyOnWriteArraySet<ChatAnnotation>();
-	private static final Set<ChatAnnotation> helperConnections = new CopyOnWriteArraySet<ChatAnnotation>();
+	private static final Set<ChatWebSocket> clientConnections = new CopyOnWriteArraySet<ChatWebSocket>();
+	private static final Set<ChatWebSocket> helperConnections = new CopyOnWriteArraySet<ChatWebSocket>();
 
 	// private String nickname;
 	private Session session;
@@ -66,7 +66,7 @@ public class ChatAnnotation {
 	static {
 		LOG.info("Starting thread");
 		chatWorker = new ChatWorker();
-		Thread thread = new Thread(chatWorker);
+		Thread thread = new Thread(chatWorker, "chat-worker-thread");
 		thread.start();
 	}
 
@@ -76,7 +76,7 @@ public class ChatAnnotation {
 
 	//
 
-	public ChatAnnotation() {
+	public ChatWebSocket() {
 		LOG.info("ChatAnnotation.new");
 		// nickname = GUEST_PREFIX + connectionIds.getAndIncrement();
 	}
@@ -115,26 +115,30 @@ public class ChatAnnotation {
 		ChatRoom room = this.chatter.getChatRoom();
 		if (room != null) {
 			Chatter client = room.getClient();
+			synchronized (client) {
+				LOG.info("Chatter {} leaves the room", client);
+				client.setChatRoom(null);
+				client.getChatSocket().isBusy = false;
+				synchronized (clientConnections) {
+					clientConnections.remove(this);
+				}
+			}
+
 			Chatter helper = room.getHelper();
-			LOG.info("Chatter {} leaves the room", client);
-			LOG.info("Chatter {} leaves the room", helper);
-			client.setChatRoom(null);
-			helper.setChatRoom(null);
-			client.getChatSocket().isBusy = false;
-			client.getChatSocket().isBusy = false;
+			synchronized (helper) {
+				LOG.info("Chatter {} leaves the room", helper);
+				helper.setChatRoom(null);
+				helper.getChatSocket().isBusy = false;
+				synchronized (helperConnections) {
+					helperConnections.remove(this);
+				}
+			}
 
 			room.setClient(null);
 			room.setHelper(null);
 			room = null;
 		}
 		//
-
-		synchronized (clientConnections) {
-			clientConnections.remove(this);
-		}
-		synchronized (helperConnections) {
-			helperConnections.remove(this);
-		}
 
 		String message = String.format("* %s %s", chatter.getId(),
 				"has disconnected.");
@@ -195,7 +199,7 @@ public class ChatAnnotation {
 		// broadcast(message);
 		// }
 		// }
-		for (ChatAnnotation client : helperConnections) {
+		for (ChatWebSocket client : helperConnections) {
 			LOG.info("Sending message to all helpers");
 			try {
 				synchronized (client) {
@@ -229,30 +233,33 @@ public class ChatAnnotation {
 			while (running) {
 				synchronized (helperConnections) {
 					if (!helperConnections.isEmpty()) {
-						for (ChatAnnotation helper : helperConnections) {
+						for (ChatWebSocket helper : helperConnections) {
 							// Look for free helpers
-							if (!helper.isBusy) {
-								LOG.info("helper {} is available",
-										helper.chatter);
-								synchronized (clientConnections) {
-									if (!clientConnections.isEmpty()) {
-										for (ChatAnnotation client : clientConnections) {
-											if (!client.isBusy) {
-												// Meet helper and client
-												LOG.info(
-														"Setting chat room for: {}, {}",
-														helper.chatter,
-														client.chatter);
-												new ChatRoom(client.chatter,
-														helper.chatter);
-												client.isBusy = true;
-												helper.isBusy = true;
-												newBroadcast(
-														"Working together",
-														client);
-												// client.session.getBasicRemote().sendText("");
-												// helper.session.getBasicRemote().sendText("");
-												break;
+							synchronized (helper) {
+								if (!helper.isBusy) {
+									LOG.info("helper {} is available",
+											helper.chatter);
+									synchronized (clientConnections) {
+										if (!clientConnections.isEmpty()) {
+											for (ChatWebSocket client : clientConnections) {
+												if (!client.isBusy) {
+													// Meet helper and client
+													LOG.info(
+															"Setting chat room for: {}, {}",
+															helper.chatter,
+															client.chatter);
+													new ChatRoom(
+															client.chatter,
+															helper.chatter);
+													client.isBusy = true;
+													helper.isBusy = true;
+													newBroadcast(
+															"Working together",
+															client);
+													// client.session.getBasicRemote().sendText("");
+													// helper.session.getBasicRemote().sendText("");
+													break;
+												}
 											}
 										}
 									}
@@ -275,9 +282,8 @@ public class ChatAnnotation {
 	 * @param msg
 	 * @param socketClient
 	 */
-	private static void newBroadcast(String msg, ChatAnnotation socketClient) {
+	private static void newBroadcast(String msg, ChatWebSocket socketClient) {
 		LOG.info("ChatAnnotation.broadcast");
-		msg = msg + "busy=" + socketClient.isBusy;
 		ChatRoom room = socketClient.chatter.getChatRoom();
 
 		try {
@@ -290,11 +296,11 @@ public class ChatAnnotation {
 
 				if (chatClient != null && chatHelper != null) {
 					LOG.info("Sending message to room");
-					ChatAnnotation client = chatClient.getChatSocket();
+					ChatWebSocket client = chatClient.getChatSocket();
 					synchronized (client) {
 						client.session.getBasicRemote().sendText(msg);
 					}
-					ChatAnnotation helper = chatHelper.getChatSocket();
+					ChatWebSocket helper = chatHelper.getChatSocket();
 					synchronized (helper) {
 						helper.session.getBasicRemote().sendText(msg);
 					}
@@ -317,6 +323,16 @@ public class ChatAnnotation {
 					socketClient.chatter.getId(), "has been disconnected.");
 			broadcast(message);
 		}
+	}
+
+	private void lookAvailableHelper(ChatWebSocket webSocket) {
+		synchronized (helperConnections) {
+
+		}
+	}
+
+	private void lookAwaitingClient() {
+
 	}
 
 }

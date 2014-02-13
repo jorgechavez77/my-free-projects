@@ -18,7 +18,7 @@ public class ChatListener implements ServletContextListener {
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
 		System.out.println("ChatListener destroyed");
-		ChatAnnotation.stopThread();
+		ChatWebSocket.stopThread();
 		// worker.setRunning(false);
 		// worker.notify();
 	}
