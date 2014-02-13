@@ -121,23 +121,26 @@ public class ChatWebSocket {
 				client.getChatSocket().isBusy = false;
 			}
 
-			Chatter helper = room.getHelper();
-			synchronized (helper) {
-				LOG.info("Chatter {} leaves the room", helper);
-				helper.setChatRoom(null);
-				helper.getChatSocket().isBusy = false;
-
+			synchronized (helperConnections) {
+				helperConnections.remove(this);
+				Chatter helper = room.getHelper();
+				synchronized (helper) {
+					LOG.info("Chatter {} leaves the room", helper);
+					helper.setChatRoom(null);
+					helper.getChatSocket().isBusy = false;
+				}
 			}
 
 			room.setClient(null);
 			room.setHelper(null);
 			room = null;
-		}
-		synchronized (clientConnections) {
-			clientConnections.remove(this);
-		}
-		synchronized (helperConnections) {
-			helperConnections.remove(this);
+		} else {
+			synchronized (clientConnections) {
+				clientConnections.remove(this);
+			}
+			synchronized (helperConnections) {
+				helperConnections.remove(this);
+			}
 		}
 		//
 
