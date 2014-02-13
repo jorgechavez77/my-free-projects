@@ -119,9 +119,6 @@ public class ChatWebSocket {
 				LOG.info("Chatter {} leaves the room", client);
 				client.setChatRoom(null);
 				client.getChatSocket().isBusy = false;
-				synchronized (clientConnections) {
-					clientConnections.remove(this);
-				}
 			}
 
 			Chatter helper = room.getHelper();
@@ -129,14 +126,18 @@ public class ChatWebSocket {
 				LOG.info("Chatter {} leaves the room", helper);
 				helper.setChatRoom(null);
 				helper.getChatSocket().isBusy = false;
-				synchronized (helperConnections) {
-					helperConnections.remove(this);
-				}
+
 			}
 
 			room.setClient(null);
 			room.setHelper(null);
 			room = null;
+		}
+		synchronized (clientConnections) {
+			clientConnections.remove(this);
+		}
+		synchronized (helperConnections) {
+			helperConnections.remove(this);
 		}
 		//
 
