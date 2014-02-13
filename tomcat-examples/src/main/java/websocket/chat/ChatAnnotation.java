@@ -99,10 +99,10 @@ public class ChatAnnotation {
 			helperConnections.add(this);
 		}
 
-		String message = String.format("* %s %s", chatter.getId(),
-				"has joined.");
+		String message = String.format("%s %s", chatter.getId(), "has joined.");
 		message = formatMessage(message);
-		broadcast(message);
+		// broadcast(message);
+		newBroadcast(message, this);
 	}
 
 	@OnClose
@@ -111,12 +111,13 @@ public class ChatAnnotation {
 		// Removing socket from lists
 
 		// Removing chat room
+		// TODO review why isBusy variable does not change to false
 		ChatRoom room = this.chatter.getChatRoom();
 		if (room != null) {
 			Chatter client = room.getClient();
 			Chatter helper = room.getHelper();
 			LOG.info("Chatter {} leaves the room", client);
-			LOG.info("Chatter {} leaves the room", client);
+			LOG.info("Chatter {} leaves the room", helper);
 			client.setChatRoom(null);
 			helper.setChatRoom(null);
 			client.getChatSocket().isBusy = false;
@@ -128,8 +129,12 @@ public class ChatAnnotation {
 		}
 		//
 
-		clientConnections.remove(this);
-		helperConnections.remove(this);
+		synchronized (clientConnections) {
+			clientConnections.remove(this);
+		}
+		synchronized (helperConnections) {
+			helperConnections.remove(this);
+		}
 
 		String message = String.format("* %s %s", chatter.getId(),
 				"has disconnected.");
@@ -145,11 +150,11 @@ public class ChatAnnotation {
 				HTMLFilter.filter(message.toString()));
 		// broadcast(filteredMessage);
 		filteredMessage = formatMessage(filteredMessage);
-		if (this.chatter.getChatRoom() != null) {
-			newBroadcast(filteredMessage, this);
-		} else {
-			broadcast(filteredMessage);
-		}
+		// if (this.chatter.getChatRoom() != null) {
+		newBroadcast(filteredMessage, this);
+		// } else {
+		// broadcast(filteredMessage);
+		// }
 	}
 
 	private String formatMessage(String filteredMessage) {
@@ -171,25 +176,25 @@ public class ChatAnnotation {
 
 	private static void broadcast(String msg) {
 		LOG.info("ChatAnnotation.broadcast");
-		for (ChatAnnotation client : clientConnections) {
-			LOG.info("Sending message to all clients");
-			try {
-				synchronized (client) {
-					client.session.getBasicRemote().sendText(msg);
-				}
-			} catch (IOException e) {
-				log.debug("Chat Error: Failed to send message to client", e);
-				clientConnections.remove(client);
-				try {
-					client.session.close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-				String message = String.format("* %s %s",
-						client.chatter.getId(), "has been disconnected.");
-				broadcast(message);
-			}
-		}
+		// for (ChatAnnotation client : clientConnections) {
+		// LOG.info("Sending message to all clients");
+		// try {
+		// synchronized (client) {
+		// client.session.getBasicRemote().sendText(msg);
+		// }
+		// } catch (IOException e) {
+		// log.debug("Chat Error: Failed to send message to client", e);
+		// clientConnections.remove(client);
+		// try {
+		// client.session.close();
+		// } catch (IOException e1) {
+		// e1.printStackTrace();
+		// }
+		// String message = String.format("* %s %s",
+		// client.chatter.getId(), "has been disconnected.");
+		// broadcast(message);
+		// }
+		// }
 		for (ChatAnnotation client : helperConnections) {
 			LOG.info("Sending message to all helpers");
 			try {
@@ -212,7 +217,6 @@ public class ChatAnnotation {
 	}
 
 	private static class ChatWorker implements Runnable {
-
 		boolean running = false;
 
 		public ChatWorker() {
@@ -228,6 +232,8 @@ public class ChatAnnotation {
 						for (ChatAnnotation helper : helperConnections) {
 							// Look for free helpers
 							if (!helper.isBusy) {
+								LOG.info("helper {} is available",
+										helper.chatter);
 								synchronized (clientConnections) {
 									if (!clientConnections.isEmpty()) {
 										for (ChatAnnotation client : clientConnections) {
@@ -241,6 +247,11 @@ public class ChatAnnotation {
 														helper.chatter);
 												client.isBusy = true;
 												helper.isBusy = true;
+												newBroadcast(
+														"Working together",
+														client);
+												// client.session.getBasicRemote().sendText("");
+												// helper.session.getBasicRemote().sendText("");
 												break;
 											}
 										}
@@ -266,26 +277,32 @@ public class ChatAnnotation {
 	 */
 	private static void newBroadcast(String msg, ChatAnnotation socketClient) {
 		LOG.info("ChatAnnotation.broadcast");
+		msg = msg + "busy=" + socketClient.isBusy;
 		ChatRoom room = socketClient.chatter.getChatRoom();
 
-		Chatter chatClient = room.getClient();
-		Chatter chatHelper = room.getHelper();
-
 		try {
-			if (chatClient != null && chatHelper != null) {
-				LOG.info("Sending message to room");
-				ChatAnnotation client = chatClient.getChatSocket();
-				synchronized (client) {
-					client.session.getBasicRemote().sendText(msg);
-				}
-				ChatAnnotation helper = chatHelper.getChatSocket();
-				synchronized (helper) {
-					helper.session.getBasicRemote().sendText(msg);
-				}
+			if (room == null) {
+				socketClient.session.getBasicRemote().sendText(msg);
 			} else {
-				LOG.info("Sending message to one only");
-				synchronized (socketClient) {
-					socketClient.session.getBasicRemote().sendText(msg);
+
+				Chatter chatClient = room.getClient();
+				Chatter chatHelper = room.getHelper();
+
+				if (chatClient != null && chatHelper != null) {
+					LOG.info("Sending message to room");
+					ChatAnnotation client = chatClient.getChatSocket();
+					synchronized (client) {
+						client.session.getBasicRemote().sendText(msg);
+					}
+					ChatAnnotation helper = chatHelper.getChatSocket();
+					synchronized (helper) {
+						helper.session.getBasicRemote().sendText(msg);
+					}
+				} else {
+					LOG.info("Sending message to one himself");
+					synchronized (socketClient) {
+						socketClient.session.getBasicRemote().sendText(msg);
+					}
 				}
 			}
 		} catch (IOException e) {
@@ -296,7 +313,7 @@ public class ChatAnnotation {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-			String message = String.format("* %s %s",
+			String message = String.format("%s %s",
 					socketClient.chatter.getId(), "has been disconnected.");
 			broadcast(message);
 		}

@@ -9,15 +9,15 @@
     </description>
 	<display-name>Servlet and JSP Examples</display-name>
 
-<!-- 	<servlet> -->
-<!-- 		<servlet-name>ChatServlet</servlet-name> -->
-<!-- 		<servlet-class>chat.control.ChatServlet</servlet-class> -->
-<!-- 	</servlet> -->
+	<!-- <servlet> -->
+	<!-- <servlet-name>ChatServlet</servlet-name> -->
+	<!-- <servlet-class>chat.control.ChatServlet</servlet-class> -->
+	<!-- </servlet> -->
 
-<!-- 	<servlet-mapping> -->
-<!-- 		<servlet-name>ChatServlet</servlet-name> -->
-<!-- 		<url-pattern>/jsp/chat/chat</url-pattern> -->
-<!-- 	</servlet-mapping> -->
+	<!-- <servlet-mapping> -->
+	<!-- <servlet-name>ChatServlet</servlet-name> -->
+	<!-- <url-pattern>/jsp/chat/chat</url-pattern> -->
+	<!-- </servlet-mapping> -->
 
 	<servlet>
 		<servlet-name>chatLogin</servlet-name>
@@ -28,6 +28,16 @@
 		<servlet-name>chatLogin</servlet-name>
 		<url-pattern>/websocket/login</url-pattern>
 	</servlet-mapping>
+
+	<filter>
+		<filter-name>chatFilter</filter-name>
+		<filter-class>websocket.chat.ChatFilter</filter-class>
+	</filter>
+
+<!-- 	<filter-mapping> -->
+<!-- 		<filter-name>chatFilter</filter-name> -->
+<!-- 		<url-pattern>/*</url-pattern> -->
+<!-- 	</filter-mapping> -->
 
 	<listener>
 		<listener-class>websocket.chat.ChatListener</listener-class>
