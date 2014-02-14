@@ -241,8 +241,8 @@ public class ChatWebSocket {
 							// Look for free helpers
 							synchronized (helper) {
 								if (!helper.isBusy) {
-									LOG.info("helper {} is available",
-											helper.chatter);
+									// LOG.info("helper {} is available",
+									// helper.chatter);
 									synchronized (clientConnections) {
 										if (!clientConnections.isEmpty()) {
 											for (ChatWebSocket client : clientConnections) {
@@ -327,16 +327,6 @@ public class ChatWebSocket {
 					socketClient.chatter.getId(), "has been disconnected.");
 			broadcast(message);
 		}
-	}
-
-	private void lookAvailableHelper(ChatWebSocket webSocket) {
-		synchronized (helperConnections) {
-
-		}
-	}
-
-	private void lookAwaitingClient() {
-
 	}
 
 }
