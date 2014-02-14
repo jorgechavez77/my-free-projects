@@ -115,11 +115,11 @@ input#chat {
 			noscripts[i].parentNode.removeChild(noscripts[i]);
 		}
 	}, false);
-	
+
 	function sendMyMessage() {
 		Chat.socket.send('This is an introductory message');
 	}
-	
+
 	//	};
 </script>
 </head>
@@ -127,7 +127,8 @@ input#chat {
 <body>
 	<table>
 		<tr>
-			<td>${user}
+			<td>
+				${user}
 				<div>
 					<p>
 						<input type="text" placeholder="type and press enter to chat"
@@ -142,7 +143,8 @@ input#chat {
 						value="Logout" type="submit" />
 				</form>
 			</td>
-			<td><c:if test="${user.type eq 'H'}">
+			<c:if test="${user.type eq 'H'}">
+			<td>
 					<table>
 						<tr>
 							<td>
@@ -170,7 +172,37 @@ input#chat {
 							</td>
 						</tr>
 					</table>
-				</c:if></td>
+			</td>
+			<td>
+				<table>
+					<tr>
+						<td>
+							<input placeholder="N° Serie">
+							<input placeholder="Codigo">
+							<input placeholder="Modelo">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<input placeholder="Garantia">
+						</td>
+					<tr>
+						<td>
+						<select>
+							<option>Problemas</option>
+						</select>
+						</td>
+					<tr>
+						<td>
+							<select multiple="multiple" title="Soluciones">
+								<option>option1</option>
+							</select>
+						</td>
+					</tr>
+				</table>
+				
+			</td>
+			</c:if>
 		</tr>
 	</table>
 </body>
