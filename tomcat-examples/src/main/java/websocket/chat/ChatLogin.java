@@ -8,13 +8,18 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import chat.domain.Chatter;
-import chat.log.MyLogger;
 import chat.service.ChatService;
 import chat.service.ChatServiceImpl;
 
 @WebServlet(name = "chatLogin", urlPatterns = "/websocket/login")
 public class ChatLogin extends HttpServlet {
+
+	private final static Logger LOG = LoggerFactory
+			.getLogger(ChatWebSocket.class);
 
 	private static final long serialVersionUID = 1L;
 
@@ -37,7 +42,7 @@ public class ChatLogin extends HttpServlet {
 		String user = req.getParameter("user");
 		String password = req.getParameter("password");
 
-		MyLogger.print("user: " + user + ", password: " + password);
+		LOG.info("user: " + user + ", password: " + password);
 
 		req.getSession();
 

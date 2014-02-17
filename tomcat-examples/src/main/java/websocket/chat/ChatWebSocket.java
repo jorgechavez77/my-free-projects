@@ -114,11 +114,14 @@ public class ChatWebSocket {
 		// TODO review why isBusy variable does not change to false
 		ChatRoom room = this.chatter.getChatRoom();
 		if (room != null) {
-			Chatter client = room.getClient();
-			synchronized (client) {
-				LOG.info("Chatter {} leaves the room", client);
-				client.setChatRoom(null);
-				client.getChatSocket().isBusy = false;
+			synchronized (clientConnections) {
+				clientConnections.remove(this);
+				Chatter client = room.getClient();
+				synchronized (client) {
+					LOG.info("Chatter {} leaves the room", client);
+					client.setChatRoom(null);
+					client.getChatSocket().isBusy = false;
+				}
 			}
 
 			synchronized (helperConnections) {
