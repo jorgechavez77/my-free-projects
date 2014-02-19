@@ -1,9 +1,13 @@
 package chat.domain;
 
+import java.io.Serializable;
+
 import websocket.chat.ChatWebSocket;
 import chat.control.ChatRoom;
 
-public class Chatter {
+public class Chatter implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public static final String CLIENT = "C";
 	public static final String HELPER = "H";

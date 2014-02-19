@@ -4,15 +4,15 @@ import chat.domain.Chatter;
 
 public class ChatRoom {
 
+	private Chatter client;
+	private Chatter helper;
+
 	public ChatRoom(Chatter client, Chatter helper) {
 		this.client = client;
 		this.helper = helper;
 		this.client.setChatRoom(this);
 		this.helper.setChatRoom(this);
 	}
-
-	private Chatter client;
-	private Chatter helper;
 
 	public Chatter getClient() {
 		return client;

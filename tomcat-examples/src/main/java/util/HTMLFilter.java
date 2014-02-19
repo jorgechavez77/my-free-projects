@@ -58,6 +58,7 @@ public final class HTMLFilter {
                 break;
             default:
                 result.append(content[i]);
+                break;
             }
         }
         return (result.toString());

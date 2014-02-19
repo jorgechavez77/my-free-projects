@@ -23,7 +23,8 @@ public class ChatLogin extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	private ChatService chatService = new ChatServiceImpl();
+	// This should be a Spring bean service
+	private static ChatService chatService = new ChatServiceImpl();
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)

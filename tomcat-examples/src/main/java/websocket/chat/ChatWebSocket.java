@@ -218,7 +218,7 @@ public class ChatWebSocket {
 				try {
 					client.session.close();
 				} catch (IOException e1) {
-					e1.printStackTrace();
+					LOG.error("IOException", e1);
 				}
 				String message = String.format("* %s %s",
 						client.chatter.getId(), "has been disconnected.");
@@ -324,7 +324,7 @@ public class ChatWebSocket {
 			try {
 				socketClient.session.close();
 			} catch (IOException e1) {
-				e1.printStackTrace();
+				LOG.error("IOException", e1);
 			}
 			String message = String.format("%s %s",
 					socketClient.chatter.getId(), "has been disconnected.");
