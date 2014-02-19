@@ -52,7 +52,7 @@ public class Chatter implements Serializable {
 
 	@Override
 	public String toString() {
-		return "chatter id: " + getId();
+		return "{user: " + getId() + "}";
 	}
 
 }

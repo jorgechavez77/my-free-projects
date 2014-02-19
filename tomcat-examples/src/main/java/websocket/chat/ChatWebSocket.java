@@ -31,8 +31,6 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,10 +44,6 @@ public class ChatWebSocket {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ChatWebSocket.class);
 
-	private static final Log log = LogFactory.getLog(ChatWebSocket.class);
-
-	// private static final String GUEST_PREFIX = "Guest";
-	// private static final AtomicInteger connectionIds = new AtomicInteger(0);
 	private static final Set<ChatWebSocket> clientConnections = new CopyOnWriteArraySet<ChatWebSocket>();
 	private static final Set<ChatWebSocket> helperConnections = new CopyOnWriteArraySet<ChatWebSocket>();
 
@@ -71,14 +65,8 @@ public class ChatWebSocket {
 	}
 
 	public static void stopThread() {
+		LOG.info("Thread stopped");
 		chatWorker.stop();
-	}
-
-	//
-
-	public ChatWebSocket() {
-		LOG.info("ChatAnnotation.new");
-		// nickname = GUEST_PREFIX + connectionIds.getAndIncrement();
 	}
 
 	@OnOpen
@@ -89,14 +77,20 @@ public class ChatWebSocket {
 		this.chatter = (Chatter) httpSession.getAttribute("user");
 		this.chatter.setChatSocket(this);
 
-		LOG.info("ChatAnnotation.start");
+		LOG.info("Open session for " + chatter);
 		this.session = session;
 
-		// Adding sockets to different lists
+		// Add socket to different lists
 		if (chatter.getType().equals(Chatter.CLIENT)) {
-			clientConnections.add(this);
+			synchronized (clientConnections) {
+				clientConnections.add(this);
+				LOG.info(clientConnections.toString());
+			}
 		} else {
-			helperConnections.add(this);
+			synchronized (helperConnections) {
+				helperConnections.add(this);
+				LOG.info(helperConnections.toString());
+			}
 		}
 
 		String message = String.format("%s %s", chatter.getId(), "has joined.");
@@ -107,11 +101,10 @@ public class ChatWebSocket {
 
 	@OnClose
 	public void end() {
-		LOG.info("ChatAnnotation.end");
+		LOG.info("end");
 		// Removing socket from lists
-
 		// Removing chat room
-		// TODO review why isBusy variable does not change to false
+
 		ChatRoom room = this.chatter.getChatRoom();
 		if (room != null) {
 			synchronized (clientConnections) {
@@ -122,6 +115,7 @@ public class ChatWebSocket {
 					client.setChatRoom(null);
 					client.getChatSocket().isBusy = false;
 				}
+				LOG.info(clientConnections.toString());
 			}
 
 			synchronized (helperConnections) {
@@ -132,6 +126,7 @@ public class ChatWebSocket {
 					helper.setChatRoom(null);
 					helper.getChatSocket().isBusy = false;
 				}
+				LOG.info(helperConnections.toString());
 			}
 
 			room.setClient(null);
@@ -140,9 +135,11 @@ public class ChatWebSocket {
 		} else {
 			synchronized (clientConnections) {
 				clientConnections.remove(this);
+				LOG.info(clientConnections.toString());
 			}
 			synchronized (helperConnections) {
 				helperConnections.remove(this);
+				LOG.info(helperConnections.toString());
 			}
 		}
 		//
@@ -155,20 +152,15 @@ public class ChatWebSocket {
 
 	@OnMessage
 	public void incoming(String message) {
-		LOG.info("ChatAnnotation.incoming");
+		LOG.info("incoming");
 		// Never trust the client
 		String filteredMessage = String.format("%s: %s", chatter.getId(),
 				HTMLFilter.filter(message.toString()));
-		// broadcast(filteredMessage);
 		filteredMessage = formatMessage(filteredMessage);
-		// if (this.chatter.getChatRoom() != null) {
 		newBroadcast(filteredMessage, this);
-		// } else {
-		// broadcast(filteredMessage);
-		// }
 	}
 
-	private String formatMessage(String filteredMessage) {
+	private static String formatMessage(String filteredMessage) {
 		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
 		StringBuilder sb = new StringBuilder();
 		sb.append("(");
@@ -181,31 +173,12 @@ public class ChatWebSocket {
 
 	@OnError
 	public void onError(Throwable t) throws Throwable {
-		LOG.info("ChatAnnotation.onError");
-		log.error("Chat Error: " + t.toString(), t);
+		LOG.info("onError");
+		LOG.error("Chat Error: " + t.toString(), t);
 	}
 
 	private static void broadcast(String msg) {
-		LOG.info("ChatAnnotation.broadcast");
-		// for (ChatAnnotation client : clientConnections) {
-		// LOG.info("Sending message to all clients");
-		// try {
-		// synchronized (client) {
-		// client.session.getBasicRemote().sendText(msg);
-		// }
-		// } catch (IOException e) {
-		// log.debug("Chat Error: Failed to send message to client", e);
-		// clientConnections.remove(client);
-		// try {
-		// client.session.close();
-		// } catch (IOException e1) {
-		// e1.printStackTrace();
-		// }
-		// String message = String.format("* %s %s",
-		// client.chatter.getId(), "has been disconnected.");
-		// broadcast(message);
-		// }
-		// }
+		LOG.info("broadcast");
 		for (ChatWebSocket client : helperConnections) {
 			LOG.info("Sending message to all helpers");
 			try {
@@ -213,7 +186,7 @@ public class ChatWebSocket {
 					client.session.getBasicRemote().sendText(msg);
 				}
 			} catch (IOException e) {
-				log.debug("Chat Error: Failed to send message to client", e);
+				LOG.error("Chat Error: Failed to send message to client", e);
 				helperConnections.remove(client);
 				try {
 					client.session.close();
@@ -260,8 +233,13 @@ public class ChatWebSocket {
 															helper.chatter);
 													client.isBusy = true;
 													helper.isBusy = true;
-													newBroadcast(
-															"Working together",
+													String message = formatMessage("* New room for "
+															+ client.chatter
+																	.getId()
+															+ " and "
+															+ helper.chatter
+																	.getId());
+													newBroadcast(message,
 															client);
 													// client.session.getBasicRemote().sendText("");
 													// helper.session.getBasicRemote().sendText("");
@@ -276,6 +254,7 @@ public class ChatWebSocket {
 					}
 				}
 			}
+			LOG.info("Shutting down the thread");
 		}
 
 		public void stop() {
@@ -290,7 +269,7 @@ public class ChatWebSocket {
 	 * @param socketClient
 	 */
 	private static void newBroadcast(String msg, ChatWebSocket socketClient) {
-		LOG.info("ChatAnnotation.broadcast");
+		LOG.info("newBroadcast");
 		ChatRoom room = socketClient.chatter.getChatRoom();
 
 		try {
@@ -319,7 +298,7 @@ public class ChatWebSocket {
 				}
 			}
 		} catch (IOException e) {
-			log.debug("Chat Error: Failed to send message to client", e);
+			LOG.error("Chat Error: Failed to send message to client", e);
 			clientConnections.remove(socketClient);
 			try {
 				socketClient.session.close();
@@ -330,6 +309,13 @@ public class ChatWebSocket {
 					socketClient.chatter.getId(), "has been disconnected.");
 			broadcast(message);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "{ chatter: " + this.chatter + ", session: " + session.getId()
+				+ ", httpSession: " + httpSession.getId() + ", isBusy: "
+				+ this.isBusy + "}";
 	}
 
 }
