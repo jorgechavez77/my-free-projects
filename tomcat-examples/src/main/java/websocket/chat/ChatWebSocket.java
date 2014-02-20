@@ -179,24 +179,37 @@ public class ChatWebSocket {
 
 	private static void broadcast(String msg) {
 		LOG.info("broadcast");
-		for (ChatWebSocket client : helperConnections) {
-			LOG.info("Sending message to all helpers");
-			try {
-				synchronized (client) {
-					client.session.getBasicRemote().sendText(msg);
-				}
-			} catch (IOException e) {
-				LOG.error("Chat Error: Failed to send message to client", e);
-				helperConnections.remove(client);
-				try {
-					client.session.close();
-				} catch (IOException e1) {
-					LOG.error("IOException", e1);
-				}
-				String message = String.format("* %s %s",
-						client.chatter.getId(), "has been disconnected.");
-				broadcast(message);
+		msg = formatMessage(msg);
+		synchronized (clientConnections) {
+			for (ChatWebSocket client : clientConnections) {
+				LOG.info("Sending message to all clients");
+				sendMessage(msg, client);
 			}
+		}
+		synchronized (helperConnections) {
+			for (ChatWebSocket client : helperConnections) {
+				LOG.info("Sending message to all helpers");
+				sendMessage(msg, client);
+			}
+		}
+	}
+
+	private static void sendMessage(String msg, ChatWebSocket client) {
+		try {
+			synchronized (client) {
+				client.session.getBasicRemote().sendText(msg);
+			}
+		} catch (IOException e) {
+			LOG.error("Chat Error: Failed to send message to client", e);
+			helperConnections.remove(client);
+			try {
+				client.session.close();
+			} catch (IOException e1) {
+				LOG.error("IOException", e1);
+			}
+			String message = String.format("* %s %s", client.chatter.getId(),
+					"has been disconnected.");
+			broadcast(message);
 		}
 	}
 
