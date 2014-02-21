@@ -252,10 +252,13 @@ public class ChatWebSocket {
 															+ " and "
 															+ helper.chatter
 																	.getId());
-													newBroadcast(message,
-															client);
-													// client.session.getBasicRemote().sendText("");
-													// helper.session.getBasicRemote().sendText("");
+													try {
+														newBroadcast(message,
+																client);
+													} catch (Exception e) {
+														LOG.error("Avoid stop",
+																e);
+													}
 													break;
 												}
 											}
@@ -297,7 +300,8 @@ public class ChatWebSocket {
 					LOG.info("Sending message to room");
 					ChatWebSocket client = chatClient.getChatSocket();
 					synchronized (client) {
-						client.session.getBasicRemote().sendText(msg);
+						// client.session.getBasicRemote().sendText(msg);
+						client.session.getAsyncRemote().sendText(msg);
 					}
 					ChatWebSocket helper = chatHelper.getChatSocket();
 					synchronized (helper) {
