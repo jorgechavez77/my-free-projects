@@ -51,11 +51,22 @@ public class ChatLogin extends HttpServlet {
 
 		if (chatter != null) {
 			req.getSession().setAttribute("user", chatter);
-			resp.sendRedirect("chat.jsp");
+			String destination = resolveDestination(chatter);
+			resp.sendRedirect(destination);
 		} else {
 			req.setAttribute("loginMessage", "User or password are incorrect");
 			req.getRequestDispatcher("index.jsp").forward(req, resp);
 		}
+	}
+
+	private String resolveDestination(Chatter chatter) {
+		String destination;
+		if (Chatter.CLIENT.equals(chatter.getType())) {
+			destination = "registerproblem.jsp";
+		} else {
+			destination = "chat.jsp";
+		}
+		return destination;
 	}
 
 	private void logout(HttpServletRequest req, HttpServletResponse resp)

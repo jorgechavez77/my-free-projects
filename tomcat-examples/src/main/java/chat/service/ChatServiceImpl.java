@@ -1,6 +1,7 @@
 package chat.service;
 
 import chat.domain.Chatter;
+import chat.domain.ProblemDetail;
 
 public class ChatServiceImpl implements ChatService {
 
@@ -19,6 +20,11 @@ public class ChatServiceImpl implements ChatService {
 	@Override
 	public String getClientType(String id) {
 		return id.contains("helper") ? Chatter.HELPER : Chatter.CLIENT;
+	}
+
+	@Override
+	public void saveProblemDetail(ProblemDetail problemDetail) {
+		// TODO Auto-generated method stub
 	}
 
 }

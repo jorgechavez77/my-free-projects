@@ -1,8 +1,12 @@
 package chat.control;
 
+import java.io.Serializable;
+
 import chat.domain.Chatter;
 
-public class ChatRoom {
+public class ChatRoom implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private Chatter client;
 	private Chatter helper;
