@@ -2,6 +2,7 @@ package chat.app.websocket;
 
 import java.io.IOException;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -10,21 +11,28 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import chat.app.domain.ChatIncident;
 import chat.app.service.ChatService;
 
-@WebServlet("/websocket/problemDetail")
-public class ProblemDetailServlet extends HttpServlet {
+@WebServlet("/websocket/chatIncident")
+public class ChatIncidentServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ChatWebSocket.class);
 
-	@Autowired
 	private ChatService chatService;
+
+	@Override
+	public void init(ServletConfig config) throws ServletException {
+		ApplicationContext context = WebApplicationContextUtils
+				.getWebApplicationContext(config.getServletContext());
+		this.chatService = (ChatService) context.getBean("chatService");
+	}
 
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {

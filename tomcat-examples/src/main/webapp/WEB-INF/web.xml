@@ -29,13 +29,13 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>problemDetail</servlet-name>
-		<servlet-class>chat.app.websocket.ProblemDetailServlet</servlet-class>
+		<servlet-name>chatIncident</servlet-name>
+		<servlet-class>chat.app.websocket.ChatIncidentServlet</servlet-class>
 	</servlet>
 	
 	<servlet-mapping>
-		<servlet-name>problemDetail</servlet-name>
-		<url-pattern>/websocket/problemDetail</url-pattern>
+		<servlet-name>chatIncident</servlet-name>
+		<url-pattern>/websocket/chatIncident</url-pattern>
 	</servlet-mapping>
 
 	<filter>
