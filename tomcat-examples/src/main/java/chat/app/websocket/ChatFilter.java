@@ -1,4 +1,4 @@
-package websocket.chat;
+package chat.app.websocket;
 
 import java.io.IOException;
 

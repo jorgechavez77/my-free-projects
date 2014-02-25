@@ -1,4 +1,4 @@
-package websocket.chat;
+package chat.app.websocket;
 
 import javax.servlet.http.HttpSession;
 import javax.websocket.HandshakeResponse;

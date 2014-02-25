@@ -1,8 +1,6 @@
-package chat.control;
+package chat.app.domain;
 
 import java.io.Serializable;
-
-import chat.domain.Chatter;
 
 public class ChatRoom implements Serializable {
 

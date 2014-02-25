@@ -1,4 +1,4 @@
-package websocket.chat;
+package chat.app.websocket;
 
 import java.io.IOException;
 
@@ -11,9 +11,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import chat.domain.Chatter;
-import chat.service.ChatService;
-import chat.service.ChatServiceImpl;
+import chat.app.domain.Chatter;
+import chat.app.service.ChatService;
+import chat.app.service.ChatServiceImpl;
 
 @WebServlet(name = "chatLogin", urlPatterns = "/websocket/login")
 public class ChatLogin extends HttpServlet {

@@ -1,4 +1,4 @@
-package websocket.chat;
+package chat.app.websocket;
 
 import java.io.IOException;
 
@@ -10,10 +10,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import chat.domain.ProblemDetail;
-import chat.service.ChatService;
-import chat.service.ChatServiceImpl;
+import chat.app.domain.ChatIncident;
+import chat.app.service.ChatService;
 
 @WebServlet("/websocket/problemDetail")
 public class ProblemDetailServlet extends HttpServlet {
@@ -23,8 +23,8 @@ public class ProblemDetailServlet extends HttpServlet {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ChatWebSocket.class);
 
-	// It has to be a Spring service
-	private ChatService chatService = new ChatServiceImpl();
+	@Autowired
+	private ChatService chatService;
 
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
@@ -32,13 +32,13 @@ public class ProblemDetailServlet extends HttpServlet {
 		String serie = request.getParameter("serie");
 		String problem = request.getParameter("problema");
 
-		ProblemDetail problemDetail = new ProblemDetail();
-		problemDetail.setModel(model);
-		problemDetail.setProblem(problem);
-		problemDetail.setSerie(serie);
+		ChatIncident chatIncident = new ChatIncident();
+		chatIncident.setModel(model);
+		chatIncident.setProblem(problem);
+		chatIncident.setSerie(serie);
 
 		try {
-			chatService.saveProblemDetail(problemDetail);
+			chatService.saveChatIncident(chatIncident);
 			response.sendRedirect("chat.jsp");
 		} catch (Exception e) {
 			LOG.error("Failed to save problem", e);

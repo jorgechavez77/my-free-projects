@@ -3,15 +3,24 @@
 	xmlns="http://java.sun.com/xml/ns/javaee"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 	metadata-complete="true" version="3.0">
-	<description>
-      Servlet and JSP Examples.
-    </description>
 
-	<display-name>Servlet and JSP Examples</display-name>
+	<description>Chat App</description>
+	<display-name>Chat App</display-name>
+
+	<context-param>
+    	<param-name>contextConfigLocation</param-name>
+    	<param-value>classpath*:/chat/app/config/spring-config.xml</param-value>
+	</context-param>
+
+	<listener>
+   		<listener-class>
+        	org.springframework.web.context.ContextLoaderListener
+   		</listener-class>
+	</listener> 
 
 	<servlet>
 		<servlet-name>chatLogin</servlet-name>
-		<servlet-class>websocket.chat.ChatLogin</servlet-class>
+		<servlet-class>chat.app.websocket.ChatLogin</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
@@ -21,7 +30,7 @@
 
 	<servlet>
 		<servlet-name>problemDetail</servlet-name>
-		<servlet-class>websocket.chat.ProblemDetailServlet</servlet-class>
+		<servlet-class>chat.app.websocket.ProblemDetailServlet</servlet-class>
 	</servlet>
 	
 	<servlet-mapping>
@@ -31,11 +40,11 @@
 
 	<filter>
 		<filter-name>chatFilter</filter-name>
-		<filter-class>websocket.chat.ChatFilter</filter-class>
+		<filter-class>chat.app.websocket.ChatFilter</filter-class>
 	</filter>
 
 	<listener>
-		<listener-class>websocket.chat.ChatListener</listener-class>
+		<listener-class>chat.app.websocket.ChatListener</listener-class>
 	</listener>
 
 	<session-config>

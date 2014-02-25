@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package websocket;
+package chat.app.websocket;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -53,7 +53,7 @@ public class ExamplesConfig implements ServerApplicationConfig {
 		System.out.println("ExamplesConfig.getAnnotatedEndpointClasses");
 		Set<Class<?>> results = new HashSet<Class<?>>();
 		for (Class<?> clazz : scanned) {
-			if (clazz.getPackage().getName().startsWith("websocket.")) {
+			if (clazz.getPackage().getName().startsWith("chat.app.websocket")) {
 				results.add(clazz);
 			}
 		}

@@ -14,7 +14,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package websocket.chat;
+package chat.app.websocket;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -34,9 +34,9 @@ import javax.websocket.server.ServerEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import util.HTMLFilter;
-import chat.control.ChatRoom;
-import chat.domain.Chatter;
+import chat.app.domain.ChatRoom;
+import chat.app.domain.Chatter;
+import chat.app.util.HTMLFilter;
 
 @ServerEndpoint(value = "/websocket/chat", configurator = GetHttpSessionConfigurator.class)
 public class ChatWebSocket {

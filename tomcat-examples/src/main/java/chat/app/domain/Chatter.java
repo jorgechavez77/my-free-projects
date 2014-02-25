@@ -1,9 +1,8 @@
-package chat.domain;
+package chat.app.domain;
 
 import java.io.Serializable;
 
-import websocket.chat.ChatWebSocket;
-import chat.control.ChatRoom;
+import chat.app.websocket.ChatWebSocket;
 
 public class Chatter implements Serializable {
 
