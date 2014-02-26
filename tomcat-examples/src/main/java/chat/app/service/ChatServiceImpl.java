@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import chat.app.domain.ChatIncident;
+import chat.app.domain.ChatIncidentDetail;
 import chat.app.domain.Chatter;
 import chat.app.repository.ChatRepository;
 
@@ -39,8 +40,15 @@ public class ChatServiceImpl implements ChatService {
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
 	public ChatIncident findChatIncidentByReporter(String reporter) {
 		return chatRepository.findChatIncidentByReporter(reporter);
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRED)
+	public void saveChatIncidentDetail(ChatIncidentDetail chatIncidentDetail) {
+		this.chatRepository.save(chatIncidentDetail);
 	}
 
 }

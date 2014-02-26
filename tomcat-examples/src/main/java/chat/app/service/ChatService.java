@@ -1,6 +1,7 @@
 package chat.app.service;
 
 import chat.app.domain.ChatIncident;
+import chat.app.domain.ChatIncidentDetail;
 import chat.app.domain.Chatter;
 
 public interface ChatService {
@@ -12,5 +13,7 @@ public interface ChatService {
 	void saveChatIncident(ChatIncident chatIncident);
 
 	ChatIncident findChatIncidentByReporter(String reporter);
-	
+
+	void saveChatIncidentDetail(ChatIncidentDetail chatIncidentDetail);
+
 }

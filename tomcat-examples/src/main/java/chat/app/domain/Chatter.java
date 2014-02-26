@@ -15,14 +15,14 @@ public class Chatter implements Serializable {
 	private ChatRoom chatRoom;
 	private String type;
 	private ChatWebSocket chatSocket;
-	private Long chatIncidentId;
+	private ChatIncident chatIncident;
 
-	public Long getChatIncidentId() {
-		return chatIncidentId;
+	public ChatIncident getChatIncident() {
+		return chatIncident;
 	}
 
-	public void setChatIncidentId(Long chatIncidentId) {
-		this.chatIncidentId = chatIncidentId;
+	public void setChatIncidentId(ChatIncident chatIncident) {
+		this.chatIncident = chatIncident;
 	}
 
 	public ChatWebSocket getChatSocket() {

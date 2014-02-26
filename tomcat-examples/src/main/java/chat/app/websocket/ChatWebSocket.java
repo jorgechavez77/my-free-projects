@@ -33,9 +33,13 @@ import javax.websocket.server.ServerEndpoint;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import chat.app.domain.ChatIncidentDetail;
 import chat.app.domain.ChatRoom;
 import chat.app.domain.Chatter;
+import chat.app.service.ChatService;
 import chat.app.util.HTMLFilter;
 
 @ServerEndpoint(value = "/websocket/chat", configurator = GetHttpSessionConfigurator.class)
@@ -43,6 +47,8 @@ public class ChatWebSocket {
 
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ChatWebSocket.class);
+
+	private static ChatService chatService;
 
 	private static final Set<ChatWebSocket> clientConnections = new CopyOnWriteArraySet<ChatWebSocket>();
 	private static final Set<ChatWebSocket> helperConnections = new CopyOnWriteArraySet<ChatWebSocket>();
@@ -74,6 +80,8 @@ public class ChatWebSocket {
 		this.httpSession = (HttpSession) config.getUserProperties().get(
 				HttpSession.class.getName());
 
+		injectBean();
+
 		this.chatter = (Chatter) httpSession.getAttribute("user");
 		this.chatter.setChatSocket(this);
 
@@ -97,6 +105,14 @@ public class ChatWebSocket {
 		message = formatMessage(message);
 		// broadcast(message);
 		newBroadcast(message, this);
+	}
+
+	private void injectBean() {
+		if (chatService == null) {
+			ApplicationContext context = WebApplicationContextUtils
+					.getWebApplicationContext(httpSession.getServletContext());
+			chatService = (ChatService) context.getBean("chatService");
+		}
 	}
 
 	@OnClose
@@ -246,6 +262,11 @@ public class ChatWebSocket {
 															helper.chatter);
 													client.isBusy = true;
 													helper.isBusy = true;
+													//
+													helper.chatter
+															.setChatIncidentId(client.chatter
+																	.getChatIncident());
+													//
 													String message = formatMessage("* New room for "
 															+ client.chatter
 																	.getId()
@@ -307,10 +328,12 @@ public class ChatWebSocket {
 					synchronized (helper) {
 						helper.session.getBasicRemote().sendText(msg);
 					}
+					saveMessage(msg);
 				} else {
 					LOG.info("Sending message to one himself");
 					synchronized (socketClient) {
 						socketClient.session.getBasicRemote().sendText(msg);
+						saveMessage(msg);
 					}
 				}
 			}
@@ -326,6 +349,12 @@ public class ChatWebSocket {
 					socketClient.chatter.getId(), "has been disconnected.");
 			broadcast(message);
 		}
+	}
+
+	private static void saveMessage(String msg) {
+		ChatIncidentDetail detail = new ChatIncidentDetail();
+		detail.setMessage(msg);
+		chatService.saveChatIncidentDetail(detail);
 	}
 
 	@Override

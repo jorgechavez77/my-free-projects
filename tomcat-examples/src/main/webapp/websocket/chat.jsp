@@ -122,6 +122,23 @@ input#chat {
 
 	//	};
 </script>
+<script type="text/javascript" src="../js/jquery-1.11.0.js"></script>
+<script type="text/javascript">
+// 	function sendData() {
+// 		var mge = $('#newText').val();
+// 		console.log(mge);
+// 		$.ajax({
+// 			type : "POST",
+// 			url : "ajaxServlet",
+// 			data : {
+// 				message : mge
+// 			}
+// 		}).done(function(msg) {
+// 			console.log("Data Saved: " + msg);
+// 		});
+// 	}
+	setInterval("Console.log('jquery...')", 10000);
+</script>
 </head>
 <!-- <body onload="load()"> -->
 <body>
@@ -145,62 +162,34 @@ input#chat {
 			</td>
 			<c:if test="${user.type eq 'H'}">
 			<td>
-					<table>
-						<tr>
-							<td>
-								<button id="presentation" onclick="sendMyMessage()">Presentacion</button>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<button>Dispositivo</button>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<button>Registro Disp.</button>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<button>Reg. Problema</button>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<button>Ayuda</button>
-							</td>
-						</tr>
-					</table>
-			</td>
-			<td>
 				<table>
 					<tr>
 						<td>
-							<input placeholder="N° Serie">
-							<input placeholder="Codigo">
-							<input placeholder="Modelo">
+							<label>Modelo:</label>
+						</td>
+						<td>
+							<input name="${user.chatIncident.model}"/>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							<input placeholder="Garantia">
+							<label>N° Serie:</label>
 						</td>
+						<td>
+							<input name="${user.chatIncident.serie}"/>
+						</td>
+					</tr>
 					<tr>
 						<td>
-						<select>
-							<option>Problemas</option>
-						</select>
+							<label>Problema:</label>
 						</td>
-					<tr>
 						<td>
-							<select multiple="multiple" title="Soluciones">
-								<option>option1</option>
-							</select>
+							<textarea name="prolema" rows="10" cols="20" >
+								${user.chatIncident.problem}
+							</textarea>
 						</td>
 					</tr>
 				</table>
-				
 			</td>
 			</c:if>
 		</tr>

@@ -58,7 +58,7 @@ public class ChatIncidentServlet extends HttpServlet {
 			ChatIncident incident = chatService
 					.findChatIncidentByReporter(chatter.getId());
 			LOG.info("chat_incident_id : {}", incident.getId());
-			chatter.setChatIncidentId(incident.getId());
+			chatter.setChatIncidentId(incident);
 			response.sendRedirect("chat.jsp");
 		} catch (Exception e) {
 			LOG.error("Failed to save problem", e);
