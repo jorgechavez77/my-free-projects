@@ -37,16 +37,11 @@ public class AjaxServlet extends HttpServlet {
 		ChatIncident chatIncident = chatter.getChatIncident();
 
 		StringBuilder sb = new StringBuilder();
-		sb.append("{");
-		sb.append("model: ");
 		sb.append(chatIncident.getModel());
-		sb.append(", ");
-		sb.append("serie: ");
+		sb.append("|");
 		sb.append(chatIncident.getSerie());
-		sb.append(", ");
-		sb.append("problem: ");
+		sb.append("|");
 		sb.append(chatIncident.getProblem());
-		sb.append("}");
 
 		resp.getWriter().write(sb.toString());
 	}

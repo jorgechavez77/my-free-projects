@@ -149,10 +149,16 @@ input#chat {
 			}
 		}).done(function(msg) {
 			console.log("response: " + msg);
+			
+			var data = msg.split("|");
+			
+			$("#model").val(data[0]);
+			$("#serie").val(data[1]);
+			$("#problem").val(data[2]);
 		});
 	}
 
-	setInterval("console.log('jquery...')", 10000);
+	//setInterval("console.log('jquery...')", 10000);
 </script>
 </head>
 <!-- <body onload="load()"> -->
@@ -160,7 +166,7 @@ input#chat {
 	<table>
 		<tr>
 			<td>
-				${user}
+				User: ${user.id}
 				<div>
 					<p>
 						<input type="text" placeholder="type and press enter to chat"
@@ -188,7 +194,7 @@ input#chat {
 							<label>Modelo:</label>
 						</td>
 						<td>
-							<input name="${user.chatIncident.model}"/>
+							<input id="model" value="${user.chatIncident.model}"/>
 						</td>
 					</tr>
 					<tr>
@@ -196,7 +202,7 @@ input#chat {
 							<label>N° Serie:</label>
 						</td>
 						<td>
-							<input name="${user.chatIncident.serie}"/>
+							<input id="serie" value="${user.chatIncident.serie}"/>
 						</td>
 					</tr>
 					<tr>
@@ -204,7 +210,7 @@ input#chat {
 							<label>Problema:</label>
 						</td>
 						<td>
-							<textarea name="prolema" rows="10" cols="20" >
+							<textarea id="problem" name="prolema" rows="10" cols="20" >
 								${user.chatIncident.problem}
 							</textarea>
 						</td>

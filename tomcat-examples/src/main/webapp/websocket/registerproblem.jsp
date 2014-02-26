@@ -31,7 +31,7 @@
 					<label>Problema:</label>
 				</td>
 				<td>
-					<textarea name="prolema" rows="10" cols="20"></textarea>
+					<textarea name="problema" rows="10" cols="20"></textarea>
 				</td>
 			</tr>
 			<tr>
