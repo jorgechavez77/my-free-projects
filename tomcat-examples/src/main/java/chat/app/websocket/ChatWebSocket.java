@@ -17,6 +17,7 @@
 package chat.app.websocket;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
@@ -43,7 +44,9 @@ import chat.app.service.ChatService;
 import chat.app.util.HTMLFilter;
 
 @ServerEndpoint(value = "/websocket/chat", configurator = GetHttpSessionConfigurator.class)
-public class ChatWebSocket {
+public class ChatWebSocket implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ChatWebSocket.class);
@@ -273,6 +276,7 @@ public class ChatWebSocket {
 															+ " and "
 															+ helper.chatter
 																	.getId());
+													
 													try {
 														newBroadcast(message,
 																client);

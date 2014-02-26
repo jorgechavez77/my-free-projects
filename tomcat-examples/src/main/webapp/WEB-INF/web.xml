@@ -37,6 +37,16 @@
 		<servlet-name>chatIncident</servlet-name>
 		<url-pattern>/websocket/chatIncident</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>ajaxServlet</servlet-name>
+		<servlet-class>chat.app.websocket.AjaxServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>ajaxServlet</servlet-name>
+		<url-pattern>/websocket/ajaxServlet</url-pattern>
+	</servlet-mapping>
 
 	<filter>
 		<filter-name>chatFilter</filter-name>

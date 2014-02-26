@@ -137,7 +137,22 @@ input#chat {
 // 			console.log("Data Saved: " + msg);
 // 		});
 // 	}
-	setInterval("Console.log('jquery...')", 10000);
+
+	function loadClientData() {
+		var mge = "";
+		console.log(mge);
+		$.ajax({
+			type : "POST",
+			url : "ajaxServlet",
+			data : {
+				message : mge
+			}
+		}).done(function(msg) {
+			console.log("response: " + msg);
+		});
+	}
+
+	setInterval("console.log('jquery...')", 10000);
 </script>
 </head>
 <!-- <body onload="load()"> -->
@@ -163,6 +178,11 @@ input#chat {
 			<c:if test="${user.type eq 'H'}">
 			<td>
 				<table>
+					<tr>
+						<td>
+							<button onclick="loadClientData()">Load Info</button>
+						</td>
+					</tr>
 					<tr>
 						<td>
 							<label>Modelo:</label>
