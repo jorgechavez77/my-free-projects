@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import org.springframework.stereotype.Repository;
 
@@ -29,8 +30,15 @@ public class ChatRepositoryImpl implements ChatRepository {
 
 	@Override
 	public User findUser(String screenName) {
-		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public ChatIncident findChatIncidentByReporter(String reporter) {
+		String qlString = "SELECT c FROM ChatIncident c WHERE c.reportedBy = :reportedBy ORDER BY c.id DESC";
+		Query query = entityManager.createQuery(qlString);
+		query.setParameter("reportedBy", reporter);
+		return (ChatIncident) query.getResultList().get(0);
 	}
 
 }

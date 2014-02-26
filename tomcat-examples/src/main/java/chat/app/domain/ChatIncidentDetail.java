@@ -9,7 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-@Entity(name = "chatIncidentDetail")
+@Entity(name = "ChatIncidentDetail")
 public class ChatIncidentDetail extends BaseEntity implements Serializable {
 
 	private static final long serialVersionUID = 1L;

@@ -3,10 +3,13 @@ CREATE TABLE chat_incident(
 id BIGINT(20) AUTO_INCREMENT PRIMARY KEY,
 model VARCHAR(100),
 serie VARCHAR(50),
-problem VARCHAR(500)
+problem VARCHAR(500),
+reported_by VARCHAR(20),
+assigned_to VARCHAR(20),
+creation_date TIMESTAMP
 );
 
-DROP TABLE problem;
+DROP TABLE chat_incident;
 
 SELECT * FROM chatincident;
 

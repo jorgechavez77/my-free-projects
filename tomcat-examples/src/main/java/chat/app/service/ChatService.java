@@ -11,4 +11,6 @@ public interface ChatService {
 
 	void saveChatIncident(ChatIncident chatIncident);
 
+	ChatIncident findChatIncidentByReporter(String reporter);
+	
 }

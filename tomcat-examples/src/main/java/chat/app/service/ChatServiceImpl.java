@@ -38,4 +38,9 @@ public class ChatServiceImpl implements ChatService {
 		chatRepository.save(chatIncident);
 	}
 
+	@Override
+	public ChatIncident findChatIncidentByReporter(String reporter) {
+		return chatRepository.findChatIncidentByReporter(reporter);
+	}
+
 }

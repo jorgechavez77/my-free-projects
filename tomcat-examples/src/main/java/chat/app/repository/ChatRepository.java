@@ -12,6 +12,8 @@ public interface ChatRepository {
 
 	ChatIncident findChatIncidentById(Serializable id);
 
+	ChatIncident findChatIncidentByReporter(String reporter);
+
 	User findUser(String screenName);
 
 }
