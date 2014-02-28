@@ -16,4 +16,6 @@ public interface ChatRepository {
 
 	User findUser(String screenName);
 
+	void update(BaseEntity entity);
+
 }

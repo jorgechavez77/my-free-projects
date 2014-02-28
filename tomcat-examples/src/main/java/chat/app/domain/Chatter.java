@@ -21,7 +21,7 @@ public class Chatter implements Serializable {
 		return chatIncident;
 	}
 
-	public void setChatIncidentId(ChatIncident chatIncident) {
+	public void setChatIncident(ChatIncident chatIncident) {
 		this.chatIncident = chatIncident;
 	}
 

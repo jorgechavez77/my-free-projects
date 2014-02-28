@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import chat.app.domain.ChatIncident;
 import chat.app.domain.ChatIncidentDetail;
 import chat.app.domain.ChatRoom;
 import chat.app.domain.Chatter;
@@ -267,8 +268,16 @@ public class ChatWebSocket implements Serializable {
 													helper.isBusy = true;
 													//
 													helper.chatter
-															.setChatIncidentId(client.chatter
+															.setChatIncident(client.chatter
 																	.getChatIncident());
+													ChatIncident chatIncident = chatService
+															.findChatIncidentByReporter(client.chatter
+																	.getId());
+													chatIncident
+															.setAssignedTo(helper.chatter
+																	.getId());
+													chatService
+															.update(chatIncident);
 													//
 													String message = formatMessage("* New room for "
 															+ client.chatter
@@ -276,7 +285,7 @@ public class ChatWebSocket implements Serializable {
 															+ " and "
 															+ helper.chatter
 																	.getId());
-													
+
 													try {
 														newBroadcast(message,
 																client);
@@ -332,12 +341,12 @@ public class ChatWebSocket implements Serializable {
 					synchronized (helper) {
 						helper.session.getBasicRemote().sendText(msg);
 					}
-					saveMessage(msg);
+					saveMessage(msg, client.chatter.getChatIncident());
 				} else {
 					LOG.info("Sending message to one himself");
 					synchronized (socketClient) {
 						socketClient.session.getBasicRemote().sendText(msg);
-						saveMessage(msg);
+						saveMessage(msg, socketClient.chatter.getChatIncident());
 					}
 				}
 			}
@@ -355,7 +364,10 @@ public class ChatWebSocket implements Serializable {
 		}
 	}
 
-	private static void saveMessage(String msg) {
+	private static void saveMessage(String msg, ChatIncident chatIncident) {
+		LOG.info("chat incident id: " + chatIncident.getId());
+		ChatIncident incident = chatService
+				.findChatIncidentByReporter(chatIncident.getReportedBy());
 		ChatIncidentDetail detail = new ChatIncidentDetail();
 		detail.setMessage(msg);
 		chatService.saveChatIncidentDetail(detail);

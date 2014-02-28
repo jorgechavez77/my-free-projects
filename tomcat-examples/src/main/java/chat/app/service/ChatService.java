@@ -16,4 +16,6 @@ public interface ChatService {
 
 	void saveChatIncidentDetail(ChatIncidentDetail chatIncidentDetail);
 
+	void update(ChatIncident chatIncident);
+
 }

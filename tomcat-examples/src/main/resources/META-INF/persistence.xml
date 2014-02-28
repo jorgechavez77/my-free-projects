@@ -8,10 +8,13 @@
 	<persistence-unit name="simple-jpa" transaction-type="RESOURCE_LOCAL">
 		<class>chat.app.domain.ChatIncident</class>
 		<class>chat.app.domain.ChatIncidentDetail</class>
+		<class>chat.app.domain.User</class>
+		<class>chat.app.domain.Role</class>
 		<exclude-unlisted-classes />
 
 		<properties>
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
+<!-- 			<property name="hibernate.dialect" value="org.hibernate.dialect.SQLServer2008Dialect" /> -->
 			<property name="hibernate.show_sql" value="true" />
 			<property name="hibernate.hbm2ddl.auto" value="validate" />
 			<property name="hibernate.ejb.naming_strategy" value="org.hibernate.cfg.ImprovedNamingStrategy" />

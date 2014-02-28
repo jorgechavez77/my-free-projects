@@ -158,7 +158,7 @@ input#chat {
 		});
 	}
 
-	//setInterval("console.log('jquery...')", 10000);
+	setInterval("loadClientData()", 10000);
 </script>
 </head>
 <!-- <body onload="load()"> -->

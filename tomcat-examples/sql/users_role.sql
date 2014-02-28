@@ -9,10 +9,34 @@ create table `users_roles` (
 	`roleId` bigint (20),
 	`userId` bigint (20)
 ); 
-insert into `users_roles` (`roleId`, `userId`) values('10160','10195');
-insert into `users_roles` (`roleId`, `userId`) values('10160','10406');
-insert into `users_roles` (`roleId`, `userId`) values('10161','10157');
-insert into `users_roles` (`roleId`, `userId`) values('10163','10195');
-insert into `users_roles` (`roleId`, `userId`) values('10163','10406');
-insert into `users_roles` (`roleId`, `userId`) values('10164','10195');
-insert into `users_roles` (`roleId`, `userId`) values('10164','10406');
+
+INSERT INTO users_roles VALUES (10161,10157);
+INSERT INTO users_roles VALUES (10160,10195);
+INSERT INTO users_roles VALUES (10163,10195);
+INSERT INTO users_roles VALUES (10164,10195);
+INSERT INTO users_roles VALUES (10160,10406);
+INSERT INTO users_roles VALUES (10163,10406);
+INSERT INTO users_roles VALUES (10164,10406);
+INSERT INTO users_roles VALUES (10164,11645);
+INSERT INTO users_roles VALUES (11603,11645);
+INSERT INTO users_roles VALUES (10164,13065);
+INSERT INTO users_roles VALUES (11603,13065);
+INSERT INTO users_roles VALUES (10164,13075);
+INSERT INTO users_roles VALUES (11603,13075);
+INSERT INTO users_roles VALUES (10164,13205);
+INSERT INTO users_roles VALUES (11604,13205);
+INSERT INTO users_roles VALUES (10164,13212);
+INSERT INTO users_roles VALUES (11604,13212);
+INSERT INTO users_roles VALUES (10164,13219);
+INSERT INTO users_roles VALUES (11604,13219);
+INSERT INTO users_roles VALUES (10164,13226);
+INSERT INTO users_roles VALUES (11604,13226);
+INSERT INTO users_roles VALUES (10164,13233);
+INSERT INTO users_roles VALUES (11604,13233);
+INSERT INTO users_roles VALUES (10164,13340);
+INSERT INTO users_roles VALUES (11602,13340);
+INSERT INTO users_roles VALUES (10164,13511);
+INSERT INTO users_roles VALUES (10164,13701);
+INSERT INTO users_roles VALUES (11604,13701);
+INSERT INTO users_roles VALUES (10164,13713);
+INSERT INTO users_roles VALUES (11604,13713);

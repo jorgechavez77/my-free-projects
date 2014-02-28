@@ -24,13 +24,32 @@ public class ChatRepositoryImpl implements ChatRepository {
 	}
 
 	@Override
+	public void update(BaseEntity entity) {
+		String updateQuery = "UPDATE ChatIncident set assignedTo = :assignedTo WHERE id = :id";
+		Query query = entityManager.createQuery(updateQuery);
+		query.setParameter("assignedTo",
+				((ChatIncident) entity).getAssignedTo());
+		query.setParameter("id", ((ChatIncident) entity).getId());
+		query.executeUpdate();
+	}
+
+	@Override
 	public ChatIncident findChatIncidentById(Serializable id) {
 		return entityManager.find(ChatIncident.class, id);
 	}
 
 	@Override
 	public User findUser(String screenName) {
-		return null;
+		String qlString = "SELECT u FROM User u WHERE u.screenName = :screenName";
+		Query query = entityManager.createQuery(qlString);
+		query.setParameter("screenName", screenName);
+		Object result = query.getSingleResult();
+
+		User user = null;
+		if (result != null) {
+			user = (User) result;
+		}
+		return user;
 	}
 
 	@Override
