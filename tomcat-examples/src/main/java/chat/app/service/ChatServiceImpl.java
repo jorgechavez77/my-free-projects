@@ -63,4 +63,16 @@ public class ChatServiceImpl implements ChatService {
 		chatRepository.update(chatIncident);
 	}
 
+	@Override
+	@Transactional(propagation = Propagation.REQUIRED)
+	public void addChatMessage(Long chatIncidentId, String message) {
+		ChatIncident chatIncident = chatRepository
+				.findChatIncidentById(chatIncidentId);
+		ChatIncidentDetail detail = new ChatIncidentDetail();
+		detail.setMessage(message);
+		chatIncident.getChatIncidentDetails().add(detail);
+		detail.setChatIncident(chatIncident);
+		chatRepository.save(detail);
+	}
+
 }

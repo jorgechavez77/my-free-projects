@@ -70,16 +70,17 @@ input#chat {
 
 		Chat.socket.onmessage = function(message) {
 			Console.log(message.data);
+			loadClientData();
 		};
 	});
 
 	Chat.initialize = function() {
 		if (window.location.protocol == 'http:') {
 			Chat.connect('ws://' + window.location.host
-					+ '/my-examples/websocket/chat');
+					+ '/chat-app/websocket/chat');
 		} else {
 			Chat.connect('wss://' + window.location.host
-					+ '/my-examples/websocket/chat');
+					+ '/chat-app/websocket/chat');
 		}
 	};
 
@@ -139,7 +140,8 @@ input#chat {
 // 	}
 
 	function loadClientData() {
-		var mge = "";
+
+	var mge = "";
 		console.log(mge);
 		$.ajax({
 			type : "POST",
@@ -149,16 +151,17 @@ input#chat {
 			}
 		}).done(function(msg) {
 			console.log("response: " + msg);
-			
+
 			var data = msg.split("|");
-			
+
 			$("#model").val(data[0]);
 			$("#serie").val(data[1]);
 			$("#problem").val(data[2]);
 		});
 	}
 
-	setInterval("loadClientData()", 10000);
+// 	setInterval("loadClientData()", 10000);
+
 </script>
 </head>
 <!-- <body onload="load()"> -->

@@ -366,11 +366,7 @@ public class ChatWebSocket implements Serializable {
 
 	private static void saveMessage(String msg, ChatIncident chatIncident) {
 		LOG.info("chat incident id: " + chatIncident.getId());
-		ChatIncident incident = chatService
-				.findChatIncidentByReporter(chatIncident.getReportedBy());
-		ChatIncidentDetail detail = new ChatIncidentDetail();
-		detail.setMessage(msg);
-		chatService.saveChatIncidentDetail(detail);
+		chatService.addChatMessage(chatIncident.getId(), msg);
 	}
 
 	@Override

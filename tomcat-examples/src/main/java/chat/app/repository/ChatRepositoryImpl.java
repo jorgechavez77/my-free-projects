@@ -32,6 +32,8 @@ public class ChatRepositoryImpl implements ChatRepository {
 		query.setParameter("id", ((ChatIncident) entity).getId());
 		query.executeUpdate();
 	}
+	
+	
 
 	@Override
 	public ChatIncident findChatIncidentById(Serializable id) {
@@ -58,6 +60,11 @@ public class ChatRepositoryImpl implements ChatRepository {
 		Query query = entityManager.createQuery(qlString);
 		query.setParameter("reportedBy", reporter);
 		return (ChatIncident) query.getResultList().get(0);
+	}
+
+	@Override
+	public void updateAll(BaseEntity entity) {
+		entityManager.merge(entity);
 	}
 
 }

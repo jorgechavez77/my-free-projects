@@ -18,4 +18,6 @@ public interface ChatService {
 
 	void update(ChatIncident chatIncident);
 
+	void addChatMessage(Long chatIncidentId, String message);
+
 }

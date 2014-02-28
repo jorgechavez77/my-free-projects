@@ -102,6 +102,6 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<finalName>my-examples</finalName>
+		<finalName>chat-app</finalName>
 	</build>
 </project>

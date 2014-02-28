@@ -39,4 +39,12 @@ public class ChatIncidentDetail extends BaseEntity implements Serializable {
 		this.message = message;
 	}
 
+	public ChatIncident getChatIncident() {
+		return chatIncident;
+	}
+
+	public void setChatIncident(ChatIncident chatIncident) {
+		this.chatIncident = chatIncident;
+	}
+
 }
