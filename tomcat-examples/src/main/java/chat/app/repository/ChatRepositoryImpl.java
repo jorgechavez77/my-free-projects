@@ -1,6 +1,7 @@
 package chat.app.repository;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -32,24 +33,23 @@ public class ChatRepositoryImpl implements ChatRepository {
 		query.setParameter("id", ((ChatIncident) entity).getId());
 		query.executeUpdate();
 	}
-	
-	
 
 	@Override
 	public ChatIncident findChatIncidentById(Serializable id) {
 		return entityManager.find(ChatIncident.class, id);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public User findUser(String screenName) {
 		String qlString = "SELECT u FROM User u WHERE u.screenName = :screenName";
 		Query query = entityManager.createQuery(qlString);
 		query.setParameter("screenName", screenName);
-		Object result = query.getSingleResult();
+		List<User> result = query.getResultList();
 
 		User user = null;
-		if (result != null) {
-			user = (User) result;
+		if (result != null && !result.isEmpty()) {
+			user = (User) result.get(0);
 		}
 		return user;
 	}
